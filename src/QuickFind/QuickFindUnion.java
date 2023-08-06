@@ -1,7 +1,7 @@
 package QuickFind;
 
 public class QuickFindUnion {
-    private int[] id;
+    protected int[] id;
     public QuickFindUnion(int N){
         id = new int[N];
         for (int i=0;i<N;i++){
@@ -9,8 +9,7 @@ public class QuickFindUnion {
         }
     }
 
-    private int root (int v){
-
+    protected int root (int v){
         while (this.id[v] !=v ){
             v = this.id[v];
         }
