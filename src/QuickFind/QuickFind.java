@@ -10,16 +10,18 @@ public class QuickFind {
         }
     }
 
-    public boolean connect(int i, int j){
+    public boolean connected(int i, int j){
         return this.id[i] == this.id[j];
     }
 
+
     public void union(int i , int j){
-        if (!this.connect(i,j)) {
+        if (!this.connected(i,j)) {
             int prev = this.id[j];
             int new_value = this.id[i];
             this.id[j] = new_value;
 
+            //at most 2N+2 operation
             //iterate the old prev value and update by j
             for (int c = 0; c < this.id.length; c++) {
                 if (this.id[c] == prev) {
@@ -59,6 +61,7 @@ public class QuickFind {
         qf.union(2,7);
         qf.union(3,8);
         qf.union(4,9);
+        qf.connected(8,9 );
         System.out.println(qf.toString());
 
     }
