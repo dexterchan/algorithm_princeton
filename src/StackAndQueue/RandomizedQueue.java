@@ -2,6 +2,7 @@ package StackAndQueue;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
+import utility.NumberArrayCreator;
 
 public class RandomizedQueue<Item> implements Iterable<Item> {
 
@@ -123,7 +124,24 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     // unit testing (required)
     public static void main(String[] args){
+        testQueueLoading();
+    }
 
+    public static void testQueueLoading(){
+        NumberArrayCreator creator = new NumberArrayCreator(1);
+        int[] list = creator.create_number_array(10, 1, 100);
+        RandomizedQueue<Integer> queue = new RandomizedQueue<>();
+        for (int i : list){
+            queue.enqueue(i);
+        }
+        int count_items = 0;
+        //verify queue
+        for (int i : list){
+            count_items+=1;
+            assert queue.dequeue() == i : "Queue not matching";
+        }
+        assert count_items == list.length;
+        assert queue.isEmpty();
     }
 
 }

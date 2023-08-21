@@ -195,7 +195,7 @@ public class Deque<Item> implements Iterable<Item> {
         int count_size = 0;
         for (int i : queue){
             count_size += 1;
-            System.out.println(i);
+            //System.out.println(i);
         }
         assert queue.removeFirst() == 100: "value should be 100";
         assert queue.isEmpty(): "Not empty";
@@ -216,7 +216,7 @@ public class Deque<Item> implements Iterable<Item> {
         count_size = 0;
         for (int i : queue){
             count_size += 1;
-            System.out.print(i + ",");
+            //System.out.print(i + ",");
         }
         System.out.println();
 
@@ -232,8 +232,8 @@ public class Deque<Item> implements Iterable<Item> {
         int count_items = 0;
 
         for (int i : queue){
-            System.out.print(i);
-            System.out.print(",");
+//            System.out.print(i);
+//            System.out.print(",");
             count_items++;
         }
         System.out.println();
@@ -242,8 +242,8 @@ public class Deque<Item> implements Iterable<Item> {
 
         count_items = 0;
         for (int i : queue){
-            System.out.print(i);
-            System.out.print(",");
+//            System.out.print(i);
+//            System.out.print(",");
             count_items++;
         }
         assert count_items == 1;
@@ -260,7 +260,7 @@ public class Deque<Item> implements Iterable<Item> {
     public static void testAddSeqQueue(){
         System.out.println("testAddSeqQueue");
         NumberArrayCreator creator = new NumberArrayCreator(1);
-        int[] list = creator.create_number_array(10, 1, 100);
+        int[] list = creator.create_number_array(1000, 1, 100);
 
         int count_num=0;
 
@@ -270,7 +270,7 @@ public class Deque<Item> implements Iterable<Item> {
         }
         System.out.println("queue");
         for (int i : queue){
-            System.out.print(i+",");
+            //System.out.print(i+",");
         }
         System.out.println();
         //Now verify if the queue works
@@ -285,7 +285,7 @@ public class Deque<Item> implements Iterable<Item> {
     public static void testAddSeqStack(){
         System.out.println("testAddSeqStack");
         NumberArrayCreator creator = new NumberArrayCreator(1);
-        int[] list = creator.create_number_array(10, 1, 100);
+        int[] list = creator.create_number_array(1000, 1, 100);
         Stack<Integer> refStack = new Stack<>();
         Deque<Integer> queue = new Deque<>();
         //Now verify if the stack works
@@ -307,7 +307,7 @@ public class Deque<Item> implements Iterable<Item> {
     public static void testStackQueueCombine(){
         System.out.println("testAddSeqQueue");
         NumberArrayCreator creator = new NumberArrayCreator(1);
-        int[] list = creator.create_number_array(10, 1, 100);
+        int[] list = creator.create_number_array(1000, 1, 100);
 
         Deque<Integer> queue = new Deque<>();
 
