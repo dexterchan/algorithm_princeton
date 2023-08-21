@@ -74,13 +74,16 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         //obtain the first iterator
         if (this.isEmpty())
             throw new NoSuchElementException("Randomized Queue is empty");
-        return this.iterator().next();
+        Item value = this.iterator().next();
+        System.out.println(value);
+        return value;
     }
 
     // return an independent iterator over items in random order
     public Iterator<Item> iterator(){
         return new Iterator<Item>() {
             Item[] _buffer = null;
+            int inx = 0;
             {
                 int total_size = RandomizedQueue.this.size();
                 RandomizedQueue.Node ref = RandomizedQueue.this.first;
@@ -107,12 +110,12 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
             @Override
             public boolean hasNext() {
-                return false;
+                return inx<_buffer.length;
             }
 
             @Override
             public Item next() {
-                return null;
+                return _buffer[inx++];
             }
 
             @Override
@@ -125,6 +128,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     // unit testing (required)
     public static void main(String[] args){
         testQueueLoading();
+        testRandomLoading();
     }
 
     public static void testQueueLoading(){
@@ -142,6 +146,24 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         }
         assert count_items == list.length;
         assert queue.isEmpty();
+    }
+
+    public static void testRandomLoading(){
+        int [] list = new int[1000];
+        for (int i=0 ;i<list.length;i++) list[i] = i;
+
+        RandomizedQueue<Integer> queue = new RandomizedQueue<>();
+
+        for (int i : list){
+            queue.enqueue(i);
+        }
+        assert queue.sample() != 0;
+
+        int counter = 0;
+        for (int i : queue){
+            assert i != list[counter++];
+        }
+
     }
 
 }

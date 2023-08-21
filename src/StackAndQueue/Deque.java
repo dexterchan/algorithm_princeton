@@ -305,7 +305,7 @@ public class Deque<Item> implements Iterable<Item> {
     }
 
     public static void testStackQueueCombine(){
-        System.out.println("testAddSeqQueue");
+        System.out.println("testStackQueueCombine");
         NumberArrayCreator creator = new NumberArrayCreator(1);
         int[] list = creator.create_number_array(1000, 1, 100);
 
