@@ -84,6 +84,8 @@ public class Deque<Item> implements Iterable<Item> {
 
     // add the item to the front
     public void addFirst(Item item){
+        if (item == null)
+            throw new IllegalArgumentException();
         Node lastFirst = this.first;
         Node newFirst = new Node(item);
 
@@ -100,6 +102,8 @@ public class Deque<Item> implements Iterable<Item> {
 
     // add the item to the back
     public void addLast(Item item){
+        if (item == null)
+            throw new IllegalArgumentException();
         Node lastLast = this.last;
 
         Node newLast = new Node(item);
@@ -166,6 +170,11 @@ public class Deque<Item> implements Iterable<Item> {
                 ref = ref.next;
                 return v;
             }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
         };
     }
 
@@ -175,6 +184,7 @@ public class Deque<Item> implements Iterable<Item> {
         testAddFirstLastElement();
         testAddSeqQueue();
         testAddSeqStack();
+        testStackQueueCombine();
     }
 
     public static  void testAddFirstElement(){
@@ -270,8 +280,6 @@ public class Deque<Item> implements Iterable<Item> {
         }
         assert count_num == list.length;
         assert queue.isEmpty();
-
-
     }
 
     public static void testAddSeqStack(){
@@ -292,6 +300,34 @@ public class Deque<Item> implements Iterable<Item> {
 
         while (!refStack.isEmpty()){
             assert refStack.pop() == queue.removeFirst();
+        }
+        assert queue.isEmpty();
+    }
+
+    public static void testStackQueueCombine(){
+        System.out.println("testAddSeqQueue");
+        NumberArrayCreator creator = new NumberArrayCreator(1);
+        int[] list = creator.create_number_array(10, 1, 100);
+
+        Deque<Integer> queue = new Deque<>();
+
+        //queue
+        for (int i : list){
+            queue.addLast(i);
+        }
+        for (int i : list){
+            assert queue.removeFirst() == i : "Queue not matching";
+        }
+        assert queue.isEmpty();
+
+        //stack
+        Stack<Integer> refStack = new Stack<>();
+        for (int i : list){
+            queue.addFirst(i);
+            refStack.add(i);
+        }
+        while(!refStack.isEmpty()){
+            assert refStack.pop() == queue.removeFirst() : "Stack not matching";
         }
         assert queue.isEmpty();
 
