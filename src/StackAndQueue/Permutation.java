@@ -1,22 +1,8 @@
 package StackAndQueue;
-import StackAndQueue.RandomizedQueue;
-
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Scanner;
 
-class StdInput {
-    static Scanner in = new Scanner(System.in);
-
-    public static boolean isEmpty(){
-        return !in.hasNextLine();
-    }
-
-    public static String readString(){
-        return  in.next();
-    }
-
-}
+import edu.princeton.cs.algs4.StdIn;
 
 public class Permutation {
     public static void main(String[] args){
@@ -24,14 +10,10 @@ public class Permutation {
         int k = Integer.parseInt(args[0]);
 
         try {
-            while (!StdInput.isEmpty()) {
-                String read_str = StdInput.readString();
-                String[] words = read_str.split(" ");
-                for (String w : words){
-                    if (queue.size()>=k)
-                        break;
-                    queue.enqueue(w);
-                }
+            while (!StdIn.isEmpty()) {
+                String read_str = StdIn.readString();
+                queue.enqueue(read_str);
+
             }
         }catch (NoSuchElementException ne){
         }finally {
