@@ -5,9 +5,11 @@ public class FastCollinearPoints {
 
     public int numberOfSegments() {
         // the number of line segments
+        throw  new UnsupportedOperationException();
     }
 
     public LineSegment[] segments() {
         // the line segments
+        throw  new UnsupportedOperationException();
     }
 }
