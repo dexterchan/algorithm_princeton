@@ -19,6 +19,8 @@ public class Point implements Comparable<Point> {
     private final int x;     // x-coordinate of this point
     private final int y;     // y-coordinate of this point
 
+    private final double MAX_SLOPE = 10^9;
+
     /**
      * Initializes a new point.
      *
@@ -63,7 +65,10 @@ public class Point implements Comparable<Point> {
      */
     public double slopeTo(Point that) {
         /* YOUR CODE HERE */
-        return ((double) (that.y - this.y)) / (that.x - this.x);
+        if (that.x != this.x)
+            return ((double) (that.y - this.y)) / (that.x - this.x);
+        else
+            return this.MAX_SLOPE;
     }
 
     /**
@@ -97,7 +102,9 @@ public class Point implements Comparable<Point> {
         return new Comparator<Point>() {
             @Override
             public int compare(Point o1, Point o2) {
-                return o1.compareTo(o2);
+                double slope1 = o1.slopeTo(Point.this);
+                double slope2 = o2.slopeTo(Point.this);
+                return Double.compare(slope1, slope2);
             }
         };
     }

@@ -11,7 +11,9 @@ public class BruteCollinearPoints {
     private ArrayList<Point[]> _collinear;
     public BruteCollinearPoints(Point[] points) {
         // finds all line segments containing 4 points
-
+        if (points == null){
+            throw new IllegalArgumentException();
+        }
         //1) sort the points first
         points = sortPoints(points);
 
