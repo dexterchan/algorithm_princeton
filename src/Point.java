@@ -71,7 +71,7 @@ public class Point implements Comparable<Point> {
         if (that.x == this.x) {
             if (this.y > that.y) {
                 return this.POSITIVE_MAX_SLOPE;
-            }else{
+            } else {
                 return this.NEGATIVE_MAX_SLOPE;
             }
         }
@@ -119,9 +119,13 @@ public class Point implements Comparable<Point> {
         return new Comparator<Point>() {
             @Override
             public int compare(Point o1, Point o2) {
-                double slope1 = o1.slopeTo(Point.this);
-                double slope2 = o2.slopeTo(Point.this);
-                return Double.compare(slope1, slope2);
+                double slope1 = Point.this.slopeTo(o1);
+                double slope2 = Point.this.slopeTo(o2);
+                if (Math.abs(slope1) == Double.POSITIVE_INFINITY && Math.abs(slope2) == Double.POSITIVE_INFINITY) {
+                    return 0;
+                }
+                int cmp = Double.compare(slope1, slope2);
+                return cmp;
             }
         };
     }
@@ -157,9 +161,28 @@ public class Point implements Comparable<Point> {
 //        Arrays.sort(points);
 //        for (Point p : points)
 //            System.out.println(p.toString());
-        Point p = new Point(1, 1);
-        Point q = new Point(1, 1);
-        System.out.println(p.slopeTo(q));
+        Point p, q, r;
+        p = new Point(1, 1);
+        q = new Point(1, 1);
+        assert p.slopeTo(q) == Double.NEGATIVE_INFINITY;
+
+        p = new Point(332, 313);
+        q = new Point(332, 229);
+        r = new Point(403, 111);
+        assert p.slopeOrder().compare(q, r) == 1;
+
+        p = new Point(1, 1);
+        q = new Point(1, 100);
+        r = new Point(1, 100);
+        assert p.slopeOrder().compare(q, r) == 0;
+
+        p = new Point(1, 1);
+        q = new Point(1, -100);
+        r = new Point(1, 100);
+        assert p.slopeOrder().compare(q, r) == 0;
+
+
+
 //        // draw the points
 //        StdDraw.enableDoubleBuffering();
 //        StdDraw.setXscale(0, 32768);
