@@ -68,12 +68,13 @@ public class Point implements Comparable<Point> {
         if (that == null) {
             throw new NullPointerException("Point is null");
         }
+
+        if (this.compareTo(that) == 0) {
+            return NEGATIVE_MAX_SLOPE;
+        }
+
         if (that.x == this.x) {
-            if (this.y > that.y) {
-                return this.POSITIVE_MAX_SLOPE;
-            } else {
-                return this.NEGATIVE_MAX_SLOPE;
-            }
+            return this.POSITIVE_MAX_SLOPE;
         }
 
         if (this.y == that.y) {
@@ -162,6 +163,12 @@ public class Point implements Comparable<Point> {
 //        for (Point p : points)
 //            System.out.println(p.toString());
         Point p, q, r;
+        //Test symmetry
+        p = new Point(193, 293);
+        q = new Point(193, 115);
+        assert p.slopeTo(q) == Double.POSITIVE_INFINITY;
+        assert q.slopeTo(p) == Double.POSITIVE_INFINITY;
+
         p = new Point(1, 1);
         q = new Point(1, 1);
         assert p.slopeTo(q) == Double.NEGATIVE_INFINITY;
@@ -180,7 +187,6 @@ public class Point implements Comparable<Point> {
         q = new Point(1, -100);
         r = new Point(1, 100);
         assert p.slopeOrder().compare(q, r) == 0;
-
 
 
 //        // draw the points

@@ -14,13 +14,22 @@ public class BruteCollinearPoints {
         if (points == null) {
             throw new IllegalArgumentException();
         }
+        Point[] immutablePoints = copyImmutablePoints(points);
+
         //1) sort the points first
-        points = sortPoints(points);
+        immutablePoints = sortPoints(immutablePoints);
 
         //2) find collinear points
-        this._collinear = findCollinearPoints(points);
+        this._collinear = findCollinearPoints(immutablePoints);
 
+    }
 
+    private static Point[] copyImmutablePoints(Point[] points){
+        Point[] copy = new Point[points.length];
+        for(int i=0;i<points.length;i++){
+            copy[i] = points[i];
+        }
+        return copy;
     }
 
     private static ArrayList<Point[]> findCollinearPoints(Point[] points) {

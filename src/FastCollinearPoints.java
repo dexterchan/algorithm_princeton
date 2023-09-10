@@ -21,8 +21,17 @@ public class FastCollinearPoints {
         if (points == null) {
             throw new IllegalArgumentException();
         }
+        Point[] immutablePoints = copyImmutablePoints(points);
 
-        _collinear = findCollinearPoints(points);
+        _collinear = findCollinearPoints(immutablePoints);
+    }
+
+    private static Point[] copyImmutablePoints(Point[] points){
+        Point[] copy = new Point[points.length];
+        for(int i=0;i<points.length;i++){
+            copy[i] = points[i];
+        }
+        return copy;
     }
 
     private static boolean equalSlope(double slope1, double slope2) {
