@@ -1,7 +1,10 @@
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdDraw;
 
-import java.util.*;
+import java.util.List;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.ArrayList;
 
 public class FastCollinearPoints {
 
