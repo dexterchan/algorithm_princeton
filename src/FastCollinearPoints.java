@@ -1,5 +1,6 @@
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdDraw;
+import utility.Timer;
 
 import java.util.List;
 import java.util.Arrays;
@@ -10,6 +11,8 @@ public class FastCollinearPoints {
 
     private List<Point[]> _collinear;
     private static final int MIN_POINTS = 4;
+
+    private static final boolean SEARCH_IS_CONSISTENT = true;
 
     private static final double SLOPE_EQUAL_RANGE = 0.000001;
     public FastCollinearPoints(Point[] points) {
@@ -94,7 +97,7 @@ public class FastCollinearPoints {
 //        }
 //        System.out.println("candidate:"+refPoint);
 
-        for(int i = start+1 ; i < end; i++){
+        for(int i = start+1 ; i < end && (!SEARCH_IS_CONSISTENT); i++){
             if (smallestPoint.compareTo(aux[i]) > 0){
                 smallestPoint = aux[i];
             }
@@ -127,11 +130,10 @@ public class FastCollinearPoints {
         // the line segments
         for (Point[] pt : this._collinear){
             //Find max Point and min Point
-            int max_inx = 0;
+            int max_inx = pt.length-1;
             int min_inx = 0;
             assert pt.length >= MIN_POINTS;
-
-            for (int j = 0;j<pt.length;j++ ){
+            for (int j = 0;j<pt.length && (!SEARCH_IS_CONSISTENT);j++ ){
                 if (pt[max_inx].compareTo(pt[j]) < 0){
                     max_inx = j;
                 }
@@ -159,8 +161,11 @@ public class FastCollinearPoints {
     }
     public static void main(String[] args){
         Point[] points = readPoints(args[0]);
+        utility.Timer timer = new Timer();
         FastCollinearPoints fast = new FastCollinearPoints(points);
         LineSegment[] lineSegments = fast.segments();
+        System.out.println("Time elapsed: " + timer.elapsedTime());
+
         for (LineSegment s : lineSegments){
             System.out.println("Segments:"+s.toString());
         }

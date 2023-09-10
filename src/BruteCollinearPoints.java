@@ -2,6 +2,7 @@
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdDraw;
+import utility.Timer;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class BruteCollinearPoints {
             for (int j=i+1; j<points.length; j++){
                 for (int k=j+1; k< points.length; k++){
                     for (int l=k+1; l< points.length; l++){
-                        System.out.println(i+","+j+","+k+","+l);
+                        //System.out.println(i+","+j+","+k+","+l);
                         double slopeij = points[i].slopeTo(points[j]);
                         double slopejk = points[j].slopeTo(points[k]);
                         double slopekl = points[k].slopeTo(points[l]);
@@ -83,8 +84,11 @@ public class BruteCollinearPoints {
 
     public static void main(String[] args){
         Point[] points = readPoints(args[0]);
+        Timer timer = new Timer();
         BruteCollinearPoints brute = new BruteCollinearPoints(points);
         LineSegment[] lineSegments = brute.segments();
+        System.out.println("Time elapsed: " + timer.elapsedTime());
+
         for (LineSegment s : lineSegments){
             System.out.println("Segments:"+s.toString());
         }
