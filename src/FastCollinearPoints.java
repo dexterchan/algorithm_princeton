@@ -61,9 +61,7 @@ public class FastCollinearPoints {
             for (int cnt = 0; cnt < aux.length; cnt++){
                 double refSlope = refPoint.slopeTo(aux[startPt]);
                 double cmpSlope = refPoint.slopeTo(aux[cnt]);
-                if (equalSlope(refSlope, cmpSlope)){
-                    continue;
-                }else{
+                if (!equalSlope(refSlope, cmpSlope)){
                     //Copy Collinar point candidates
                     if (cnt - startPt >= MIN_POINTS-1 ){
                         if (filterCollinratPointsCandidate(aux, startPt, cnt, refPoint)){
