@@ -12,14 +12,14 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdDraw;
 
 import java.util.Comparator;
-import java.util.Arrays;
 
 public class Point implements Comparable<Point> {
 
     private final int x;     // x-coordinate of this point
     private final int y;     // y-coordinate of this point
 
-    private final double MAX_SLOPE = 10^9;
+    private final double POSITIVE_MAX_SLOPE = Double.POSITIVE_INFINITY;
+    private final double NEGATIVE_MAX_SLOPE = Double.NEGATIVE_INFINITY;
 
     /**
      * Initializes a new point.
@@ -65,10 +65,20 @@ public class Point implements Comparable<Point> {
      */
     public double slopeTo(Point that) {
         /* YOUR CODE HERE */
-        if (that.x != this.x)
+        if (that == null) {
+            throw new NullPointerException("Point is null");
+        }
+        if (that.x == this.x) {
+            return this.NEGATIVE_MAX_SLOPE;
+        }
+
+        if (this.y == that.y) {
+            return 0;
+        } else {
             return ((double) (that.y - this.y)) / (that.x - this.x);
-        else
-            return this.MAX_SLOPE;
+        }
+
+
     }
 
     /**
@@ -85,6 +95,9 @@ public class Point implements Comparable<Point> {
      */
     public int compareTo(Point that) {
         /* YOUR CODE HERE */
+        if (that == null) {
+            throw new NullPointerException("Point is null");
+        }
         if (this.y != that.y) {
             return this.y - that.y;
         }
@@ -137,18 +150,21 @@ public class Point implements Comparable<Point> {
             points[i] = new Point(x, y);
         }
 
-        Arrays.sort(points);
-        for (Point p : points)
-            System.out.println(p.toString());
-
-        // draw the points
-        StdDraw.enableDoubleBuffering();
-        StdDraw.setXscale(0, 32768);
-        StdDraw.setYscale(0, 32768);
-        for (Point p : points) {
-            p.draw();
-        }
-        StdDraw.show();
+//        Arrays.sort(points);
+//        for (Point p : points)
+//            System.out.println(p.toString());
+        Point p = new Point(1, 1);
+        Point q = new Point(1, 1);
+        System.out.println(p.slopeTo(q));
+//        // draw the points
+//        StdDraw.enableDoubleBuffering();
+//        StdDraw.setXscale(0, 32768);
+//        StdDraw.setYscale(0, 32768);
+//        for (Point p : points) {
+//            p.draw();
+//        }
+//
+//        StdDraw.show();
     }
 
 

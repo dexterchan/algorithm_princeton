@@ -2,17 +2,16 @@
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdDraw;
-import utility.Timer;
 
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 public class BruteCollinearPoints {
     private ArrayList<Point[]> _collinear;
+
     public BruteCollinearPoints(Point[] points) {
         // finds all line segments containing 4 points
-        if (points == null){
+        if (points == null) {
             throw new IllegalArgumentException();
         }
         //1) sort the points first
@@ -24,19 +23,19 @@ public class BruteCollinearPoints {
 
     }
 
-    private static ArrayList<Point[]> findCollinearPoints(Point[] points){
+    private static ArrayList<Point[]> findCollinearPoints(Point[] points) {
         ArrayList<Point[]> _collinear = new ArrayList<>();
         //The cost is ~ N^4
-        for (int i=0; i<points.length; i++){
-            for (int j=i+1; j<points.length; j++){
-                for (int k=j+1; k< points.length; k++){
-                    for (int l=k+1; l< points.length; l++){
+        for (int i = 0; i < points.length; i++) {
+            for (int j = i + 1; j < points.length; j++) {
+                for (int k = j + 1; k < points.length; k++) {
+                    for (int l = k + 1; l < points.length; l++) {
                         //System.out.println(i+","+j+","+k+","+l);
                         double slopeij = points[i].slopeTo(points[j]);
                         double slopejk = points[j].slopeTo(points[k]);
                         double slopekl = points[k].slopeTo(points[l]);
-                        if ((slopeij == slopejk) && (slopejk == slopekl)){
-                            Point[] p = { points[i], points[j], points[k], points[l]};
+                        if ((slopeij == slopejk) && (slopejk == slopekl)) {
+                            Point[] p = {points[i], points[j], points[k], points[l]};
                             _collinear.add(p);
                         }
                     }
@@ -46,7 +45,7 @@ public class BruteCollinearPoints {
         return _collinear;
     }
 
-    private static Point[] sortPoints(Point[] points){
+    private static Point[] sortPoints(Point[] points) {
         Arrays.sort(points);
         return points;
     }
@@ -60,17 +59,17 @@ public class BruteCollinearPoints {
         LineSegment[] segments = new LineSegment[this.numberOfSegments()];
 
         int cnt = 0;
-        while (cnt<this.numberOfSegments()){
+        while (cnt < this.numberOfSegments()) {
             Point[] points = this._collinear.get(cnt);
             segments[cnt] = new LineSegment(
-                    points[0], points[points.length-1]
+                    points[0], points[points.length - 1]
             );
             cnt++;
         }
         return segments;
     }
 
-    private static Point[] readPoints(String path){
+    private static Point[] readPoints(String path) {
         In in = new In(path);
         int n = in.readInt();
         Point[] points = new Point[n];
@@ -82,15 +81,15 @@ public class BruteCollinearPoints {
         return points;
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         Point[] points = readPoints(args[0]);
-        Timer timer = new Timer();
+        //Timer timer = new Timer();
         BruteCollinearPoints brute = new BruteCollinearPoints(points);
         LineSegment[] lineSegments = brute.segments();
-        System.out.println("Time elapsed: " + timer.elapsedTime());
+        //System.out.println("Time elapsed: " + timer.elapsedTime());
 
-        for (LineSegment s : lineSegments){
-            System.out.println("Segments:"+s.toString());
+        for (LineSegment s : lineSegments) {
+            System.out.println("Segments:" + s.toString());
         }
 
         // draw the points
@@ -100,7 +99,7 @@ public class BruteCollinearPoints {
 //        for (Point p : points){
 //            p.draw();
 //        }
-        for (LineSegment s : lineSegments){
+        for (LineSegment s : lineSegments) {
             s.draw();
         }
     }
