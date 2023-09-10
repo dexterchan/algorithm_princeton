@@ -69,7 +69,11 @@ public class Point implements Comparable<Point> {
             throw new NullPointerException("Point is null");
         }
         if (that.x == this.x) {
-            return this.NEGATIVE_MAX_SLOPE;
+            if (this.y > that.y) {
+                return this.POSITIVE_MAX_SLOPE;
+            }else{
+                return this.NEGATIVE_MAX_SLOPE;
+            }
         }
 
         if (this.y == that.y) {
