@@ -19,7 +19,8 @@ public class Point implements Comparable<Point> {
     private final int x;     // x-coordinate of this point
     private final int y;     // y-coordinate of this point
 
-    private final double MAX_SLOPE = 10^9;
+    private final double POSITIVE_MAX_SLOPE = Double.POSITIVE_INFINITY;
+    private final double NEGATIVE_MAX_SLOPE = Double.NEGATIVE_INFINITY;
 
     /**
      * Initializes a new point.
@@ -65,10 +66,25 @@ public class Point implements Comparable<Point> {
      */
     public double slopeTo(Point that) {
         /* YOUR CODE HERE */
-        if (that.x != this.x)
+        if (that == null) {
+            throw new NullPointerException("Point is null");
+        }
+
+        if (this.compareTo(that) == 0) {
+            return NEGATIVE_MAX_SLOPE;
+        }
+
+        if (that.x == this.x) {
+            return this.POSITIVE_MAX_SLOPE;
+        }
+
+        if (this.y == that.y) {
+            return 0;
+        } else {
             return ((double) (that.y - this.y)) / (that.x - this.x);
-        else
-            return this.MAX_SLOPE;
+        }
+
+
     }
 
     /**
