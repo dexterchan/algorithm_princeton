@@ -9,9 +9,9 @@ import java.util.List;
 public class FastCollinearPoints {
 
     private List<Point[]> _collinear;
-    private static final int MIN_POINTS = 4;
+    private static final int MIN_POINTS = 3;
 
-    private static final double SLOPE_EQUAL_RANGE = 0.000001;
+    private static final double SLOPE_EQUAL_RANGE = 0;
 
     public FastCollinearPoints(Point[] points) {
         // finds all line segments containing 4 or more points
@@ -25,7 +25,7 @@ public class FastCollinearPoints {
         //1) sort the points first
         immutablePoints = sortPoints(immutablePoints, null);
 
-        _collinear = findCollinearPoints(immutablePoints);
+        _collinear = findCollinearPointsImproved(immutablePoints);
     }
 
     private static boolean hasDuplicate(Point[] points){
@@ -46,27 +46,34 @@ public class FastCollinearPoints {
         return Math.abs(slope1 - slope2) < SLOPE_EQUAL_RANGE;
     }
 
-    private static List<Point[]> findCollinearPointsImproved(Point[] points, Comparator<Point> comparator) {
+    private static List<Point[]> findCollinearPointsImproved(Point[] points) {
         List<Point[]> collinearPoints = new ArrayList<>();
 
-        final int p = 0;
-
         for (int i = 0; i < points.length; i++) {
+            sortPoints(points,null);
             Point refPoint = points[i];
             //Sort the aux array with point[i] slope order
-            Arrays.sort(points, refPoint.slopeOrder());
+            sortPoints(points, refPoint.slopeOrder());
+//            Arrays.stream(points).forEach(
+//                    pp->System.out.print(pp.toString())
+//            );
+//            System.out.println("<-points:"+ refPoint.toString());
+//            Arrays.stream(points).forEach(
+//                    pp -> System.out.print(pp.slopeTo(refPoint)+",")
+//            );
+            //System.out.println("<--slopes:" + refPoint.toString());
             //By exploiting self slope to be -ve infinity
             //we compare slope from position 0
-            // Find the start and end positon of each segment
+            // Find the start and end position of each segment
             //by windowing
-            int start = 1, end = start+1;
+            int start = 1, end = 2;
             while(end < points.length){
                 double refSlope = refPoint.slopeTo(points[start]);
                 double cmpSlope = refPoint.slopeTo(points[end]);
-                if (equalSlope(refSlope, cmpSlope)){
+                if (Double.compare(refSlope, cmpSlope)==0){
                     end++;
                 }else{
-                    if (end - start >= MIN_POINTS - 1) {
+                    if (end - start >= MIN_POINTS && refPoint.compareTo(points[start]) < 0 ) {
                         Point[] _points = copyPoints(points, refPoint, start, end);
                         collinearPoints.add(_points);
                     }
@@ -75,54 +82,9 @@ public class FastCollinearPoints {
                 }
             }
         }
-    }
-
-    private static List<Point[]> findCollinearPoints(Point[] points) {
-        List<Point[]> collinearPoints = new ArrayList<>();
-
-
-
-        Point[] aux = new Point[points.length - 1];
-        for (int i = 0; i < points.length; i++) {
-            Point refPoint = points[i];
-
-            //copy other points into aux
-            for (int j = 0, c = 0; j < points.length; j++) {
-                if (i != j) {
-                    aux[c++] = points[j];
-                }
-            }
-
-            //Sort the aux array with point[i] slope order
-            Arrays.sort(aux, refPoint.slopeOrder());
-//            Arrays.stream(aux).forEach(
-//                    p->System.out.print(Optional.ofNullable(p).orElseThrow().toString())
-//            );
-//            System.out.println("<-points:"+ refPoint.toString());
-//            Arrays.stream(aux).forEach(
-//                    p -> System.out.print(p.slopeTo(refPoint)+",")
-//            );
-//            System.out.println("<--slopes:" + refPoint.toString());
-
-            int startPt = 0;
-            //Scan the slope
-            for (int cnt = 0; cnt < aux.length; cnt++) {
-                double refSlope = refPoint.slopeTo(aux[startPt]);
-                double cmpSlope = refPoint.slopeTo(aux[cnt]);
-                if (!equalSlope(refSlope, cmpSlope)) {
-                    //Copy Collinar point candidates
-                    if (cnt - startPt >= MIN_POINTS - 1) {
-                        if (filterCollinratPointsCandidate(aux, startPt, cnt, refPoint)) {
-                            Point[] _points = copyPoints(aux, refPoint, startPt, cnt);
-                            collinearPoints.add(_points);
-                        }
-                    }
-                    startPt = cnt;
-                }
-            }
-        }
         return collinearPoints;
     }
+
 
     private static Point[] copyPoints(Point[] aux, Point refPoint, int start, int end) {
         Point[] _points = new Point[end - start + 1];
@@ -132,30 +94,6 @@ public class FastCollinearPoints {
         }
         return _points;
     }
-
-    private static boolean filterCollinratPointsCandidate(Point[] aux, int start, int end, Point refPoint) {
-        //Find the smallest point in aux
-        //Cost ~N
-        Point smallestPoint = aux[start];
-
-//        for (int i=start;i<end;i++){
-//            System.out.print(aux[i].toString()+",");
-//        }
-//        System.out.println("candidate:"+refPoint);
-
-        for (int i = start + 1; i < end; i++) {
-            if (smallestPoint.compareTo(aux[i]) > 0) {
-                smallestPoint = aux[i];
-            }
-        }
-        if (smallestPoint.compareTo(refPoint) < 0) {
-            return false;
-        }
-//        System.out.println("SmallestPoint:"+smallestPoint.toString()+"candidate:"+refPoint.toString()+"passed"+smallestPoint.compareTo(refPoint) );
-//        System.out.println("candidate:"+refPoint+"passed");
-        return true;
-    }
-
 
     private static Point[] sortPoints(Point[] points, Comparator<Point> comparator) {
         if (comparator != null)
@@ -171,25 +109,13 @@ public class FastCollinearPoints {
     }
 
     public LineSegment[] segments() {
-        LineSegment[] segments = new LineSegment[this._collinear.size()];
-        int s = 0;
-        // the line segments
-        for (Point[] pt : this._collinear) {
-            //Find max Point and min Point
-            int max_inx = pt.length - 1;
-            int min_inx = 0;
-            assert pt.length >= MIN_POINTS;
+        LineSegment[] segments = new LineSegment[this.numberOfSegments()];
 
-            for (int j = 0; j < pt.length; j++) {
-                if (pt[max_inx].compareTo(pt[j]) < 0) {
-                    max_inx = j;
-                }
-                if (pt[min_inx].compareTo(pt[j]) > 0) {
-                    min_inx = j;
-                }
-            }
-            segments[s++] = new LineSegment(
-                    pt[min_inx], pt[max_inx]
+        // the line segments
+        for (int s=0 ; s < segments.length; s++) {
+            Point[] points = this._collinear.get(s);
+            segments[s] = new LineSegment(
+                    points[0], points[points.length - 1]
             );
         }
         return segments;
@@ -216,14 +142,14 @@ public class FastCollinearPoints {
         }
 
         // draw the points
-        StdDraw.enableDoubleBuffering();
-        StdDraw.setXscale(0, 32768);
-        StdDraw.setYscale(0, 32768);
+//        StdDraw.enableDoubleBuffering();
+//        StdDraw.setXscale(0, 32768);
+//        StdDraw.setYscale(0, 32768);
 //        for (Point p : points){
 //            p.draw();
 //        }
-        for (LineSegment s : lineSegments) {
-            s.draw();
-        }
+//        for (LineSegment s : lineSegments) {
+//            s.draw();
+//        }
     }
 }
