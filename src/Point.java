@@ -122,9 +122,6 @@ public class Point implements Comparable<Point> {
             public int compare(Point o1, Point o2) {
                 double slope1 = Point.this.slopeTo(o1);
                 double slope2 = Point.this.slopeTo(o2);
-                if (Math.abs(slope1) == Double.POSITIVE_INFINITY && Math.abs(slope2) == Double.POSITIVE_INFINITY) {
-                    return 0;
-                }
                 return Double.compare(slope1, slope2);
             }
         };
@@ -162,6 +159,15 @@ public class Point implements Comparable<Point> {
 //        for (Point p : points)
 //            System.out.println(p.toString());
         Point p, q, r;
+
+        p = new Point(0, 2);
+        q = new Point(0, 5);
+        r = new Point(0, 2);
+        assert p.slopeTo(q) == Double.POSITIVE_INFINITY;
+        assert p.slopeTo(r) == Double.NEGATIVE_INFINITY;
+        assert p.slopeOrder().compare(q, r) == 1;
+
+
         //Test symmetry
         p = new Point(193, 293);
         q = new Point(193, 115);

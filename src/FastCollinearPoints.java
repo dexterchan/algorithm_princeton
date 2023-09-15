@@ -18,27 +18,37 @@ public class FastCollinearPoints {
         if (points == null) {
             throw new IllegalArgumentException();
         }
-        Point[] immutablePoints = copyImmutablePoints(points);
+        if (hasDuplicate(points)) {
+            throw new IllegalArgumentException();
+        }
+        Point[] immutablePoints = points.clone();
+        //1) sort the points first
+        immutablePoints = sortPoints(immutablePoints, null);
 
         _collinear = findCollinearPoints(immutablePoints);
     }
 
-    private static Point[] copyImmutablePoints(Point[] points) {
-        Point[] copy = new Point[points.length];
+    private static boolean hasDuplicate(Point[] points){
+        Point lastPoint = null;
         for (int i = 0; i < points.length; i++) {
-            copy[i] = points[i];
+            if (lastPoint != null && lastPoint.compareTo(points[i]) == 0) {
+                return true;
+            }
+            lastPoint = points[i];
         }
-        return copy;
+        return false;
     }
 
     private static boolean equalSlope(double slope1, double slope2) {
+//        if (slope1 == Double.NEGATIVE_INFINITY || slope2 == Double.NEGATIVE_INFINITY) {
+//            return false;
+//        }
         return Math.abs(slope1 - slope2) < SLOPE_EQUAL_RANGE;
     }
 
     private static List<Point[]> findCollinearPoints(Point[] points) {
         List<Point[]> collinearPoints = new ArrayList<>();
-        //1) sort the pints first
-        sortPoints(points, null);
+
 
 
         Point[] aux = new Point[points.length - 1];
@@ -68,9 +78,7 @@ public class FastCollinearPoints {
             for (int cnt = 0; cnt < aux.length; cnt++) {
                 double refSlope = refPoint.slopeTo(aux[startPt]);
                 double cmpSlope = refPoint.slopeTo(aux[cnt]);
-                if (equalSlope(refSlope, cmpSlope)) {
-                    continue;
-                } else {
+                if (!equalSlope(refSlope, cmpSlope)) {
                     //Copy Collinar point candidates
                     if (cnt - startPt >= MIN_POINTS - 1) {
                         if (filterCollinratPointsCandidate(aux, startPt, cnt, refPoint)) {

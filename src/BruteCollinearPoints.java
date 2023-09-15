@@ -9,18 +9,35 @@ import java.util.Arrays;
 public class BruteCollinearPoints {
     private ArrayList<Point[]> _collinear;
 
+    private static final double INVALID_SLOPE = Double.NEGATIVE_INFINITY;
+
     public BruteCollinearPoints(Point[] points) {
         // finds all line segments containing 4 points
         if (points == null) {
             throw new IllegalArgumentException();
         }
+        if (hasDuplicate(points)) {
+            throw new IllegalArgumentException();
+        }
+        Point[] immutablePoints = points.clone();
         //1) sort the points first
-        points = sortPoints(points);
+        immutablePoints = sortPoints(immutablePoints);
 
         //2) find collinear points
-        this._collinear = findCollinearPoints(points);
+        this._collinear = findCollinearPoints(immutablePoints);
 
 
+    }
+
+    private static boolean hasDuplicate(Point[] points){
+        Point lastPoint = null;
+        for (int i = 0; i < points.length; i++) {
+            if (lastPoint != null && lastPoint.compareTo(points[i]) == 0) {
+                return true;
+            }
+            lastPoint = points[i];
+        }
+        return false;
     }
 
     private static ArrayList<Point[]> findCollinearPoints(Point[] points) {
@@ -30,11 +47,16 @@ public class BruteCollinearPoints {
             for (int j = i + 1; j < points.length; j++) {
                 for (int k = j + 1; k < points.length; k++) {
                     for (int l = k + 1; l < points.length; l++) {
-                        System.out.println(i + "," + j + "," + k + "," + l);
+                        //System.out.println(i + "," + j + "," + k + "," + l);
                         double slopeij = points[i].slopeTo(points[j]);
                         double slopejk = points[j].slopeTo(points[k]);
                         double slopekl = points[k].slopeTo(points[l]);
                         if ((slopeij == slopejk) && (slopejk == slopekl)) {
+                            if (slopeij == INVALID_SLOPE) {
+                                //System.out.println("Invalid slope"+points[i].toString()+","+points[j].toString()+","+points[k].toString()+","+points[l].toString());
+                                continue;
+                            }
+
                             Point[] p = {points[i], points[j], points[k], points[l]};
                             _collinear.add(p);
                         }
@@ -61,10 +83,14 @@ public class BruteCollinearPoints {
         int cnt = 0;
         while (cnt < this.numberOfSegments()) {
             Point[] points = this._collinear.get(cnt);
-            segments[cnt] = new LineSegment(
+//            for (Point pt : points) {
+//                System.out.print(pt.toString() + ",");
+//            }
+//            System.out.println();
+            segments[cnt++] = new LineSegment(
                     points[0], points[points.length - 1]
             );
-            cnt++;
+
         }
         return segments;
     }
