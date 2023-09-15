@@ -46,6 +46,37 @@ public class FastCollinearPoints {
         return Math.abs(slope1 - slope2) < SLOPE_EQUAL_RANGE;
     }
 
+    private static List<Point[]> findCollinearPointsImproved(Point[] points, Comparator<Point> comparator) {
+        List<Point[]> collinearPoints = new ArrayList<>();
+
+        final int p = 0;
+
+        for (int i = 0; i < points.length; i++) {
+            Point refPoint = points[i];
+            //Sort the aux array with point[i] slope order
+            Arrays.sort(points, refPoint.slopeOrder());
+            //By exploiting self slope to be -ve infinity
+            //we compare slope from position 0
+            // Find the start and end positon of each segment
+            //by windowing
+            int start = 1, end = start+1;
+            while(end < points.length){
+                double refSlope = refPoint.slopeTo(points[start]);
+                double cmpSlope = refPoint.slopeTo(points[end]);
+                if (equalSlope(refSlope, cmpSlope)){
+                    end++;
+                }else{
+                    if (end - start >= MIN_POINTS - 1) {
+                        Point[] _points = copyPoints(points, refPoint, start, end);
+                        collinearPoints.add(_points);
+                    }
+                    start = end;
+                    end++;
+                }
+            }
+        }
+    }
+
     private static List<Point[]> findCollinearPoints(Point[] points) {
         List<Point[]> collinearPoints = new ArrayList<>();
 
