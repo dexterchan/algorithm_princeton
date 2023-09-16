@@ -1,5 +1,4 @@
 import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.StdDraw;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,13 +21,10 @@ public class FastCollinearPoints {
             throw new IllegalArgumentException();
         }
         Point[] immutablePoints = points.clone();
-        //1) sort the points first
-        immutablePoints = sortPoints(immutablePoints, null);
-
         _collinear = findCollinearPointsImproved(immutablePoints);
     }
 
-    private static boolean hasDuplicate(Point[] points){
+    private static boolean hasDuplicate(Point[] points) {
         Point lastPoint = null;
         for (int i = 0; i < points.length; i++) {
             if (lastPoint != null && lastPoint.compareTo(points[i]) == 0) {
@@ -39,18 +35,11 @@ public class FastCollinearPoints {
         return false;
     }
 
-    private static boolean equalSlope(double slope1, double slope2) {
-//        if (slope1 == Double.NEGATIVE_INFINITY || slope2 == Double.NEGATIVE_INFINITY) {
-//            return false;
-//        }
-        return Math.abs(slope1 - slope2) < SLOPE_EQUAL_RANGE;
-    }
-
     private static List<Point[]> findCollinearPointsImproved(Point[] points) {
         List<Point[]> collinearPoints = new ArrayList<>();
 
         for (int i = 0; i < points.length; i++) {
-            sortPoints(points,null);
+            sortPoints(points, null);
             Point refPoint = points[i];
             //Sort the aux array with point[i] slope order
             sortPoints(points, refPoint.slopeOrder());
@@ -67,19 +56,19 @@ public class FastCollinearPoints {
             // Find the start and end position of each segment
             //by windowing
             int start = 1, end = 2;
-            while(end < points.length){
-                double refSlope = refPoint.slopeTo(points[start]);
-                double cmpSlope = refPoint.slopeTo(points[end]);
-                if (Double.compare(refSlope, cmpSlope)==0){
-                    end++;
-                }else{
-                    if (end - start >= MIN_POINTS && refPoint.compareTo(points[start]) < 0 ) {
-                        Point[] _points = copyPoints(points, refPoint, start, end);
-                        collinearPoints.add(_points);
-                    }
-                    start = end;
+            while (end < points.length) {
+                while (end < points.length && Double.compare(refPoint.slopeTo(points[start]), refPoint.slopeTo(points[end])) == 0) {
                     end++;
                 }
+                //Filter the segments with less than 3 points
+                //and remove duplicated segments
+                if (end - start >= MIN_POINTS && refPoint.compareTo(points[start]) < 0) {
+                    Point[] _points = copyPoints(points, refPoint, start, end);
+                    collinearPoints.add(_points);
+                }
+                start = end;
+                end++;
+
             }
         }
         return collinearPoints;
@@ -96,10 +85,8 @@ public class FastCollinearPoints {
     }
 
     private static Point[] sortPoints(Point[] points, Comparator<Point> comparator) {
-        if (comparator != null)
-            Arrays.sort(points, comparator);
-        else
-            Arrays.sort(points);
+        if (comparator != null) Arrays.sort(points, comparator);
+        else Arrays.sort(points);
         return points;
     }
 
@@ -112,11 +99,9 @@ public class FastCollinearPoints {
         LineSegment[] segments = new LineSegment[this.numberOfSegments()];
 
         // the line segments
-        for (int s=0 ; s < segments.length; s++) {
+        for (int s = 0; s < segments.length; s++) {
             Point[] points = this._collinear.get(s);
-            segments[s] = new LineSegment(
-                    points[0], points[points.length - 1]
-            );
+            segments[s] = new LineSegment(points[0], points[points.length - 1]);
         }
         return segments;
     }

@@ -51,7 +51,8 @@ public class BruteCollinearPoints {
                         double slopeij = points[i].slopeTo(points[j]);
                         double slopejk = points[j].slopeTo(points[k]);
                         double slopekl = points[k].slopeTo(points[l]);
-                        if ((slopeij == slopejk) && (slopejk == slopekl)) {
+                        if (Double.compare(slopeij, slopejk)==0 &&
+                                Double.compare(slopejk, slopekl)==0 ) {
                             if (slopeij == INVALID_SLOPE) {
                                 //System.out.println("Invalid slope"+points[i].toString()+","+points[j].toString()+","+points[k].toString()+","+points[l].toString());
                                 continue;
