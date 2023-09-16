@@ -1,3 +1,5 @@
+package Collinear;
+
 import edu.princeton.cs.algs4.In;
 
 import java.util.ArrayList;
@@ -7,7 +9,8 @@ import java.util.List;
 
 public class FastCollinearPoints {
 
-    private List<Point[]> _collinear;
+    //private List<Point[]> _collinear;
+    private List<LineSegment> _segments;
     private static final int MIN_POINTS = 3;
 
     private static final double SLOPE_EQUAL_RANGE = 0;
@@ -17,14 +20,25 @@ public class FastCollinearPoints {
         if (points == null) {
             throw new IllegalArgumentException();
         }
+        checkNull(points);
         if (hasDuplicate(points)) {
             throw new IllegalArgumentException();
         }
         Point[] immutablePoints = points.clone();
-        _collinear = findCollinearPointsImproved(immutablePoints);
+
+        _segments = findCollinearPointsImproved(immutablePoints);
+    }
+
+    private static void checkNull(Point[] points) {
+        for (int i = 0; i < points.length; i++) {
+            if (points[i] == null) {
+                throw new IllegalArgumentException();
+            }
+        }
     }
 
     private static boolean hasDuplicate(Point[] points) {
+        sortPoints(points, null);
         Point lastPoint = null;
         for (int i = 0; i < points.length; i++) {
             if (lastPoint != null && lastPoint.compareTo(points[i]) == 0) {
@@ -35,8 +49,9 @@ public class FastCollinearPoints {
         return false;
     }
 
-    private static List<Point[]> findCollinearPointsImproved(Point[] points) {
-        List<Point[]> collinearPoints = new ArrayList<>();
+    private static List<LineSegment> findCollinearPointsImproved(Point[] points) {
+        //List<Point[]> collinearPoints = new ArrayList<>();
+        List<LineSegment> _segments = new ArrayList<>();
 
         for (int i = 0; i < points.length; i++) {
             sortPoints(points, null);
@@ -63,15 +78,14 @@ public class FastCollinearPoints {
                 //Filter the segments with less than 3 points
                 //and remove duplicated segments
                 if (end - start >= MIN_POINTS && refPoint.compareTo(points[start]) < 0) {
-                    Point[] _points = copyPoints(points, refPoint, start, end);
-                    collinearPoints.add(_points);
+                    _segments.add(new LineSegment(refPoint, points[end - 1]));
                 }
                 start = end;
                 end++;
 
             }
         }
-        return collinearPoints;
+        return _segments;
     }
 
 
@@ -92,18 +106,18 @@ public class FastCollinearPoints {
 
     public int numberOfSegments() {
         // the number of line segments
-        return this._collinear.size();
+        return this._segments.size();
     }
 
     public LineSegment[] segments() {
-        LineSegment[] segments = new LineSegment[this.numberOfSegments()];
-
-        // the line segments
-        for (int s = 0; s < segments.length; s++) {
-            Point[] points = this._collinear.get(s);
-            segments[s] = new LineSegment(points[0], points[points.length - 1]);
-        }
-        return segments;
+//        LineSegment[] segments = new LineSegment[this.numberOfSegments()];
+//
+//        // the line segments
+//        for (int s = 0; s < segments.length; s++) {
+//            Point[] points = this._collinear.get(s);
+//            segments[s] = new LineSegment(points[0], points[points.length - 1]);
+//        }
+        return _segments.toArray(new LineSegment[_segments.size()]);
     }
 
     private static Point[] readPoints(String path) {
@@ -122,6 +136,7 @@ public class FastCollinearPoints {
         Point[] points = readPoints(args[0]);
         FastCollinearPoints fast = new FastCollinearPoints(points);
         LineSegment[] lineSegments = fast.segments();
+        assert lineSegments.length == fast.numberOfSegments();
         for (LineSegment s : lineSegments) {
             System.out.println("Segments:" + s.toString());
         }
@@ -136,5 +151,11 @@ public class FastCollinearPoints {
 //        for (LineSegment s : lineSegments) {
 //            s.draw();
 //        }
+        try{
+            Point[] _points = new Point[]{new Point(1, 1), null, new Point(3, 3), new Point(4, 4)};
+            FastCollinearPoints _fast = new FastCollinearPoints(_points);
+        }catch (IllegalArgumentException e){
+            System.out.println("IllegalArgumentException");
+        }
     }
 }

@@ -1,4 +1,4 @@
-//https://coursera.cs.princeton.edu/algs4/assignments/collinear/specification.php
+package Collinear;//https://coursera.cs.princeton.edu/algs4/assignments/collinear/specification.php
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdDraw;
@@ -16,6 +16,7 @@ public class BruteCollinearPoints {
         if (points == null) {
             throw new IllegalArgumentException();
         }
+        checkNull(points);
         if (hasDuplicate(points)) {
             throw new IllegalArgumentException();
         }
@@ -29,7 +30,24 @@ public class BruteCollinearPoints {
 
     }
 
+    private static Point[] clonePoints(Point[] points){
+        Point[] clonedPoints = new Point[points.length];
+        for (int i = 0; i < points.length; i++) {
+            clonedPoints[i] = points[i];
+        }
+        return clonedPoints;
+    }
+
+    private static void checkNull(Point[] points){
+        for (int i = 0; i < points.length; i++) {
+            if (points[i] == null) {
+                throw new IllegalArgumentException();
+            }
+        }
+    }
+
     private static boolean hasDuplicate(Point[] points){
+        sortPoints(points);
         Point lastPoint = null;
         for (int i = 0; i < points.length; i++) {
             if (lastPoint != null && lastPoint.compareTo(points[i]) == 0) {
@@ -126,5 +144,6 @@ public class BruteCollinearPoints {
         for (LineSegment s : lineSegments) {
             s.draw();
         }
+
     }
 }
