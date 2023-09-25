@@ -68,10 +68,13 @@ public class Board {
             for (int j = 0; j < n; j++) {
                 int tile = tiles[i][j];
                 if (tile != 0) {
-                    int ref = i * n + j + 1;
-                    int diff = Math.abs(tile - ref);
-                    int dist = diff / n + diff % n;
-                    count += dist;
+                    int distX = Math.abs((tile - 1) / n - i);
+                    int distY = Math.abs((tile - 1) % n - j);
+                    //wrong implementation
+//                    int ref = i * n + j + 1;
+//                    int diff = Math.abs(tile - ref);
+//                    int dist = diff / n + diff % n;
+                    count += (distX + distY);
                 }
             }
         }
@@ -198,6 +201,40 @@ public class Board {
         int[][] titles = null;
         Board board = null;
         Iterable<Board> iter = null;
+
+        board = new Board(new int[][]{
+                {1, 0},
+                {2, 3}
+        });
+        assert board.manhattan() == 2 + 1;
+
+        board = new Board(
+                new int[][]{
+                        {5, 8, 7},
+                        {1, 4, 6},
+                        {3, 0, 2}
+                }
+        );
+        assert board.manhattan() == 17;
+
+        board = new Board(
+                new int[][]{
+                        {0, 1, 5},
+                        {6, 2, 7},
+                        {8, 4, 3}
+                }
+        );
+        assert board.manhattan() == 14;
+
+        board = new Board(
+                new int[][]{
+                        {14, 7, 0, 3},
+                        {2, 9, 8, 13},
+                        {15, 11, 10, 1},
+                        {5, 12, 6, 4}
+                }
+        );
+        assert board.manhattan() == 38;
 
         board = new Board(new int[][]{{0, 1}, {2, 3},});
         assert board.twin().equals(new Board(new int[][]{{0, 2}, {1, 3}}));
