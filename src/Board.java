@@ -120,27 +120,19 @@ public class Board {
                     //it is the blank
                     //check neighor right move
                     if ((i - 1) >= 0) {
-                        neighborslst.add(
-                                swap(this, i - 1, j, i, j)
-                        );
+                        neighborslst.add(swap(this, i - 1, j, i, j));
                     }
                     //check neighor down move
                     if (j - 1 >= 0) {
-                        neighborslst.add(
-                                swap(this, i, j - 1, i, j)
-                        );
+                        neighborslst.add(swap(this, i, j - 1, i, j));
                     }
                     //check neighor left move
                     if (i + 1 < dimension) {
-                        neighborslst.add(
-                                swap(this, i + 1, j, i, j)
-                        );
+                        neighborslst.add(swap(this, i + 1, j, i, j));
                     }
                     //check neighor up move
                     if (j + 1 < dimension) {
-                        neighborslst.add(
-                                swap(this, i, j + 1, i, j)
-                        );
+                        neighborslst.add(swap(this, i, j + 1, i, j));
                     }
                 }
             }
@@ -169,21 +161,21 @@ public class Board {
 
         boolean first_found = false;
         first_x = 0;
-        while(first_x < dimension && !first_found){
+        while (first_x < dimension && !first_found) {
             for (first_y = 0; first_y < dimension; first_y++) {
                 if (this.tiles[first_x][first_y] != 0) {
                     first_found = true;
                     break;
                 }
             }
-            if (!first_found){
+            if (!first_found) {
                 first_x++;
             }
         }
         boolean second_found = false;
         second_x = first_x;
 
-        while(second_x<dimension && !second_found){
+        while (second_x < dimension && !second_found) {
             second_y = (second_x == first_x) ? first_y + 1 : 0;
             for (; second_y < dimension; second_y++) {
                 if (this.tiles[second_x][second_y] != 0) {
@@ -191,7 +183,7 @@ public class Board {
                     break;
                 }
             }
-            if (!second_found){
+            if (!second_found) {
                 second_x++;
             }
         }
@@ -207,75 +199,36 @@ public class Board {
         Board board = null;
         Iterable<Board> iter = null;
 
-        board = new Board(new int[][]{
-                {0 , 1 },
-                {2,  3},
-        });
-        assert board.twin().equals(
-                new Board(new int[][]{
-                        {0, 2},
-                        {1, 3}
-                })
-        );
+        board = new Board(new int[][]{{0, 1}, {2, 3},});
+        assert board.twin().equals(new Board(new int[][]{{0, 2}, {1, 3}}));
 //        iter = board.neighbors();
 //        iter.forEach(
 //                b -> System.out.println(b.toString())
 //        );
 
-        board = new Board(new int[][]{
-                {1 , 0 },
-                {2,  3},
-        });
+        board = new Board(new int[][]{{1, 0}, {2, 3},});
 //        board.neighbors().forEach(
 //                b -> System.out.println(b.toString())
 //        );
 
-        board = new Board(new int[][]{
-                {1 , 2 },
-                {0,  3},
-        });
-        board.neighbors().forEach(
-                b -> System.out.println(b.toString())
-        );
+        board = new Board(new int[][]{{1, 2}, {0, 3},});
+        board.neighbors().forEach(b -> System.out.println(b.toString()));
 
-        board = new Board(new int[][]{
-                {1 , 2 },
-                {3,  0},
-        });
-        board.neighbors().forEach(
-                b -> System.out.println(b.toString())
-        );
+        board = new Board(new int[][]{{1, 2}, {3, 0},});
+        board.neighbors().forEach(b -> System.out.println(b.toString()));
 
 
-
-        Board board3 = new Board(new int[][]{
-                {1, 0},
-                {3, 2}
-        });
-        assert board3.twin().equals(
-                new Board(new int[][]{
-                        {3, 0},
-                        {1, 2}
-                })
-        );
+        Board board3 = new Board(new int[][]{{1, 0}, {3, 2}});
+        assert board3.twin().equals(new Board(new int[][]{{3, 0}, {1, 2}}));
 
 
-
-        titles = new int[][]{
-                {1, 0, 3},
-                {4, 2, 5},
-                {7, 8, 6}
-        };
+        titles = new int[][]{{1, 0, 3}, {4, 2, 5}, {7, 8, 6}};
         board = new Board(titles);
         iter = board.neighbors();
         iter.forEach(b -> System.out.println(b.toString()));
 
 
-        titles = new int[][]{
-                {8, 1, 3},
-                {4, 0, 2},
-                {7, 6, 5}
-        };
+        titles = new int[][]{{8, 1, 3}, {4, 0, 2}, {7, 6, 5}};
 
         board = new Board(titles);
         System.out.println("Check center:" + board.manhattan());
@@ -284,56 +237,27 @@ public class Board {
         iter.forEach(b -> System.out.println(b.toString()));
 
 
-        titles = new int[][]{
-                {1, 8, 3},
-                {4, 5, 6},
-                {7, 2, 0}
-        };
+        titles = new int[][]{{1, 8, 3}, {4, 5, 6}, {7, 2, 0}};
         board = new Board(titles);
         System.out.println("Check right bottom corner:" + board.manhattan());
         iter = board.neighbors();
         iter.forEach(b -> System.out.println(b.toString()));
 
         System.out.println("Test twin");
-        board = new Board(new int[][]{
-                {1, 8, 3},
-                {4, 5, 6},
-                {7, 2, 0}
-        });
+        board = new Board(new int[][]{{1, 8, 3}, {4, 5, 6}, {7, 2, 0}});
         System.out.println(board.twin().toString());
-        assert board.twin().equals(
-                new Board(new int[][]{
-                        {8, 1, 3},
-                        {4, 5, 6},
-                        {7, 2, 0}
-                })
-        );
+        assert board.twin().equals(new Board(new int[][]{{8, 1, 3}, {4, 5, 6}, {7, 2, 0}}));
 
         LinkedList<Board> testHash = new LinkedList<>();
         testHash.add(board);
-        Board board2 = new Board(new int[][]{
-                {1, 8, 3},
-                {4, 5, 6},
-                {7, 2, 0}
-        });
+        Board board2 = new Board(new int[][]{{1, 8, 3}, {4, 5, 6}, {7, 2, 0}});
 
         assert board.equals(board2);
         assert testHash.contains(board2);
 
 
-        board = new Board(new int[][]{
-                {1, 2, 3},
-                {4, 5, 6},
-                {8, 7, 0}
-        });
-        assert board.twin().equals(
-                new Board(new int[][]{
-                        {2, 1, 3},
-                        {4, 5, 6},
-                        {8, 7, 0}
-                })
-        );
-
+        board = new Board(new int[][]{{1, 2, 3}, {4, 5, 6}, {8, 7, 0}});
+        assert board.twin().equals(new Board(new int[][]{{2, 1, 3}, {4, 5, 6}, {8, 7, 0}}));
 
 
     }

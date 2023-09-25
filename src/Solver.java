@@ -1,4 +1,8 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Comparator;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import edu.princeton.cs.algs4.MinPQ;
@@ -10,33 +14,33 @@ public class Solver {
     private List<Board> best_solution = null;
 
     private int max_steps = 0;
-    static class Node implements Comparable<Node>{
+
+    private static class Node implements Comparable<Node> {
         int moves = 0;
         Board board;
 
         LinkedList<Node> history = new LinkedList<>();
 
 
-
-        Node(Board board, int moves){
+        Node(Board board, int moves) {
             if (board == null) throw new IllegalArgumentException();
             this.board = board;
             this.moves = moves;
         }
 
-        Node branchNewNode(Board board){
-            Node node = new Node(board, this.moves+1);
-            for (Node h : this.history){
+        Node branchNewNode(Board board) {
+            Node node = new Node(board, this.moves + 1);
+            for (Node h : this.history) {
                 node.history.add(h);
             }
             return node;
         }
 
-        int manhatten_priority(){
+        int manhatten_priority() {
             return board.manhattan() + moves;
         }
 
-        int hamming_priority(){
+        int hamming_priority() {
             return board.hamming() + moves;
         }
 
@@ -48,11 +52,11 @@ public class Solver {
             return this.moves - o.moves;
         }
 
-        public static Comparator<Node> getManhattenComparator(){
+        public static Comparator<Node> getManhattenComparator() {
             return new Comparator<Node>() {
                 @Override
                 public int compare(Node o1, Node o2) {
-                    if (o1 == null || o2 ==null){
+                    if (o1 == null || o2 == null) {
                         throw new IllegalArgumentException();
                     }
                     return o1.manhatten_priority() - o2.manhatten_priority();
@@ -60,11 +64,11 @@ public class Solver {
             };
         }
 
-        public static Comparator<Node> getHammingComparator(){
+        public static Comparator<Node> getHammingComparator() {
             return new Comparator<Node>() {
                 @Override
                 public int compare(Node o1, Node o2) {
-                    if (o1 == null || o2 ==null){
+                    if (o1 == null || o2 == null) {
                         throw new IllegalArgumentException();
                     }
                     return o1.hamming_priority() - o2.hamming_priority();
@@ -72,10 +76,10 @@ public class Solver {
             };
         }
 
-        void printHistory(){
+        void printHistory() {
             System.out.println("Total moves" + this.moves);
             int step = 0;
-            for (Node h : this.history){
+            for (Node h : this.history) {
                 System.out.println("Step:" + step++);
                 System.out.println(h.board.toString());
                 System.out.println(h.board.manhattan());
@@ -84,8 +88,8 @@ public class Solver {
     }
 
     // find a solution to the initial board (using the A* algorithm)
-    public Solver(Board initial){
-        if(initial == null){
+    public Solver(Board initial) {
+        if (initial == null) {
             throw new IllegalArgumentException();
         }
         this.max_steps = initial.dimension() * initial.dimension() * 1000000;
@@ -93,16 +97,15 @@ public class Solver {
 
         Board twinBoard = initial.twin();
         List<Node> twin_nodes = this.solveThePuzzle(twinBoard, this.max_steps);
-        System.out.println("Number of solutions:"+nodes.size());
+        System.out.println("Number of solutions:" + nodes.size());
         System.out.println("Number of twin solutions:" + twin_nodes.size());
 
 
-
-        if (!nodes.isEmpty() && twin_nodes.isEmpty()){
+        if (!nodes.isEmpty() && twin_nodes.isEmpty()) {
             this.solvable = true;
         } else if (nodes.isEmpty() && !twin_nodes.isEmpty()) {
             this.solvable = false;
-        }else{
+        } else {
             throw new IllegalArgumentException("Solvable status is undetermined");
         }
 
@@ -117,7 +120,7 @@ public class Solver {
         }
     }
 
-    private static ArrayList<Node> solveThePuzzle(Board broad, int max_steps){
+    private static ArrayList<Node> solveThePuzzle(Board broad, int max_steps) {
         LinkedList<Board> visitedBoardLst = new LinkedList<>();
         //Priority Queue
         MinPQ<Node> priorityQ = new MinPQ<>(Node.getManhattenComparator());
@@ -125,31 +128,31 @@ public class Solver {
         ArrayList<Node> solution = new ArrayList<>();
         int steps = 0;
 
-        while(!priorityQ.isEmpty() && steps < max_steps){
+        while (!priorityQ.isEmpty() && steps < max_steps) {
             steps++;
             Node minNode = priorityQ.delMin();
-            if (visitedBoardLst.contains(minNode.board)){
+            if (visitedBoardLst.contains(minNode.board)) {
                 continue;
             }
             Board theBoard = minNode.board;
             visitedBoardLst.add(theBoard);
             minNode.history.add(minNode);
 
-            System.out.println("Running steps:"+steps+theBoard.toString());
-            System.out.println("Hamming:"+theBoard.hamming());
-            System.out.println("manhattan:"+theBoard.manhattan());
+            System.out.println("Running steps:" + steps + theBoard.toString());
+            System.out.println("Hamming:" + theBoard.hamming());
+            System.out.println("manhattan:" + theBoard.manhattan());
             //System.out.println("visitedBoardLst:"+visitedBoardLst.size());
             System.out.println("Solution length:" + solution.size());
             System.out.println("PriorityQueue length:" + priorityQ.size());
 
             //Check if it is goal
-            if (theBoard.isGoal()){
+            if (theBoard.isGoal()) {
                 solution.add(minNode);
                 continue;
             }
 
             //Get next moves
-            for (Board newBoard :minNode.board.neighbors()){
+            for (Board newBoard : minNode.board.neighbors()) {
                 Node branchNode = minNode.branchNewNode(newBoard);
                 priorityQ.insert(branchNode);
             }
@@ -160,25 +163,25 @@ public class Solver {
     }
 
     // is the initial board solvable? (see below)
-    public boolean isSolvable(){
+    public boolean isSolvable() {
         return solvable;
     }
 
     // min number of moves to solve initial board; -1 if unsolvable
-    public int moves(){
-        if (!this.isSolvable()){
+    public int moves() {
+        if (!this.isSolvable()) {
             return -1;
         }
         return _moves;
     }
 
     // sequence of boards in a shortest solution; null if unsolvable
-    public Iterable<Board> solution(){
+    public Iterable<Board> solution() {
         return best_solution;
     }
 
     // test client (see below)
-    public static void main(String[] args){
+    public static void main(String[] args) {
         int[][] titles = null;
         Board board = null;
         Solver solver = null;
@@ -219,10 +222,9 @@ public class Solver {
         board = new Board(titles);
         List<Node> node = Solver.solveThePuzzle(board, 100);
         node.get(0).history.forEach(
-                h->System.out.println(h.board.toString())
+                h -> System.out.println(h.board.toString())
         );
         //solver = new Solver(board);
-
 
 
 //        titles = new int[][]{
