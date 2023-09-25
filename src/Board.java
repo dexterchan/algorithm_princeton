@@ -84,7 +84,16 @@ public class Board {
 
     // is this board the goal board?
     public boolean isGoal() {
-        return hamming() == 0 && manhattan() == 0;
+        int n = dimension;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                int ref = (i!=n-1 || j != n-1) ? i * n + j + 1 : 0 ;
+                if (this.tiles[i][j] != ref){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     // does this board equal y?

@@ -24,6 +24,7 @@ public class Solver {
 
         Node(Board board, int moves) {
             if (board == null) throw new IllegalArgumentException();
+            if (moves < 0) throw new IllegalArgumentException();
             this.board = board;
             this.moves = moves;
         }
@@ -49,7 +50,7 @@ public class Solver {
             if (o == null) {
                 throw new NullPointerException("Node is null");
             }
-            return this.moves - o.moves;
+            return  this.manhatten_priority() - o.manhatten_priority() ;
         }
 
         public static Comparator<Node> getManhattenComparator() {
@@ -59,7 +60,7 @@ public class Solver {
                     if (o1 == null || o2 == null) {
                         throw new IllegalArgumentException();
                     }
-                    return o1.manhatten_priority() - o2.manhatten_priority();
+                    return  o1.manhatten_priority() - o2.manhatten_priority() ;
                 }
             };
         }
@@ -92,7 +93,7 @@ public class Solver {
         if (initial == null) {
             throw new IllegalArgumentException();
         }
-        this.max_steps = initial.dimension() * initial.dimension() * 1000000;
+        this.max_steps = initial.dimension() * initial.dimension() * 10;
         ArrayList<Node> nodes = this.solveThePuzzle(initial, this.max_steps);
 
         Board twinBoard = initial.twin();
@@ -123,7 +124,7 @@ public class Solver {
     private static ArrayList<Node> solveThePuzzle(Board broad, int max_steps) {
         LinkedList<Board> visitedBoardLst = new LinkedList<>();
         //Priority Queue
-        MinPQ<Node> priorityQ = new MinPQ<>(Node.getManhattenComparator());
+        MinPQ<Node> priorityQ = new MinPQ<>();
         priorityQ.insert(new Node(broad, 0));
         ArrayList<Node> solution = new ArrayList<>();
         int steps = 0;
@@ -139,6 +140,7 @@ public class Solver {
             minNode.history.add(minNode);
 
             System.out.println("Running steps:" + steps + theBoard.toString());
+            System.out.println("moves:" + minNode.moves);
             System.out.println("Hamming:" + theBoard.hamming());
             System.out.println("manhattan:" + theBoard.manhattan());
             //System.out.println("visitedBoardLst:"+visitedBoardLst.size());
@@ -205,12 +207,12 @@ public class Solver {
 
 
         titles = new int[][]{
-                {0, 1, 3},
-                {4, 2, 5},
-                {7, 8, 6}
-//                {2, 1, 3},
-//                {4, 5, 6},
-//                {8, 7, 0}
+//                {0, 1, 3},
+//                {4, 2, 5},
+//                {7, 8, 6}
+                {2, 1, 3},
+                {4, 5, 6},
+                {8, 7, 0}
 //                {1, 0, 3},
 //               {4, 2, 5},
 //                {7, 8, 6}
@@ -221,9 +223,10 @@ public class Solver {
 //        };
         board = new Board(titles);
         List<Node> node = Solver.solveThePuzzle(board, 100);
-        node.get(0).history.forEach(
-                h -> System.out.println(h.board.toString())
-        );
+        System.out.println(node);
+//        node.get(0).history.forEach(
+//                h -> System.out.println(h.board.toString())
+//        );
         //solver = new Solver(board);
 
 
