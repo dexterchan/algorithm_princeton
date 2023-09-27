@@ -1,6 +1,6 @@
-
 import edu.princeton.cs.algs4.MinPQ;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -10,21 +10,21 @@ public class Solver {
     MinPQ<Node> priorityQ = new MinPQ<>();
     Node solvedNode = null;
 
-    boolean is_solvable = false;
+    Board initialBoard = null;
+
 
     public Solver(Board initial) {
         if (initial == null) {
             throw new IllegalArgumentException();
         }
+        this.initialBoard = initial;
         Board twinBoard = initial.twin();
 
         priorityQ.insert(new Node(initial, 0, null));
         priorityQ.insert(new Node(twinBoard, 0, null));
 
-        int max_steps = initial.dimension() * initial.dimension() * 100;
+        int max_steps = initial.dimension() * initial.dimension() * 1000;
         this.solvedNode = solvePuzzle(priorityQ, max_steps);
-
-
 
     }
 
@@ -34,18 +34,31 @@ public class Solver {
             Node minNode = priorityQ.delMin();
             Board theBoard = minNode.board;
 
-            System.out.println(theBoard.toString());
-            System.out.println(priorityQ.size());
+//            System.out.println("Steps:" + steps);
+//            System.out.println(theBoard.toString());
+
             //Check if reach the goal
             if (theBoard.isGoal()) {
                 return minNode;
             }
 
             for (Board newBoard : minNode.board.neighbors()) {
-                if (minNode.previousNode != null && newBoard.equals(minNode.previousNode.board)) {
-                    //skip duplicated run
+                Node prevNode = minNode.previousNode;
+                boolean skipThisBoard = false;
+                while (prevNode != null) {
+                    if (newBoard.equals(prevNode.board)) {
+                        skipThisBoard = true;
+                        break;
+                    }
+                    prevNode = prevNode.previousNode;
+                }
+                if (skipThisBoard) {
                     continue;
                 }
+//                if (minNode.previousNode != null && newBoard.equals(minNode.previousNode.board)) {
+//                    //skip duplicated run
+//                    continue;
+//                }
                 priorityQ.insert(new Node(newBoard, minNode.moves + 1, minNode));
             }
 
@@ -55,11 +68,27 @@ public class Solver {
 
     // is the initial board solvable? (see below)
     public boolean isSolvable() {
-        if (this.solvedNode == null){
+        if (this.solvedNode == null) {
             throw new IllegalArgumentException("Failed to determine solvable");
         }
+        Iterator<Board> itr = this.getMoveHistory();
+        Board firstBoard = itr.next();
+        return firstBoard.equals(this.initialBoard);
+    }
 
-        return this.is_solvable;
+    private Iterator<Board> getMoveHistory() {
+        Stack<Board> stack = new Stack<>();
+        List<Board> queue = new LinkedList<>();
+        Node n = this.solvedNode;
+        while (n != null) {
+            stack.push(n.board);
+            n = n.previousNode;
+        }
+        while (!stack.isEmpty()) {
+            queue.add(stack.pop());
+        }
+
+        return queue.iterator();
     }
 
     // min number of moves to solve initial board; -1 if unsolvable
@@ -72,10 +101,14 @@ public class Solver {
 
     // sequence of boards in a shortest solution; null if unsolvable
     public Iterable<Board> solution() {
-        Stack<Board> stack = new Stack<>();
-        LinkedList<Board> lst = new LinkedList<>();
-
-        return lst;
+        if (!this.isSolvable()) {
+            return null;
+        }
+        LinkedList<Board> steps = new LinkedList<>();
+        for (Iterator<Board> it = this.getMoveHistory(); it.hasNext(); ) {
+            steps.add(it.next());
+        }
+        return steps;
     }
 
 
@@ -124,8 +157,29 @@ public class Solver {
         board = new Board(titles);
         solver = new Solver(board);
 
+        int i = 0;
+//        for (Iterator<Board> b = solver.getMoveHistory(); b.hasNext(); i++) {
+//            Board bd = b.next();
+//            System.out.println("Steps" + i);
+//            System.out.println(bd.toString());
+//        }
+        assert solver.isSolvable();
+        assert solver.moves() == solver.solvedNode.moves;
+        assert solver.solution() != null;
+        assert solver.solution() instanceof Iterable;
 
-        Node node = Solver.solvePuzzle(solver.priorityQ, 100000000);
-        System.out.println(node);
+
+        titles = new int[][]{
+                {1, 2, 3},
+                {4, 5, 6},
+                {8, 7, 0}
+        };
+        board = new Board(titles);
+        solver = new Solver(board);
+        assert !solver.isSolvable();
+        assert solver.moves() == -1;
+        assert solver.solution() == null;
+
+
     }
 }
