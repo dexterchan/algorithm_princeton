@@ -7,10 +7,10 @@ import java.util.Stack;
 
 public class Solver {
 
-    MinPQ<Node> priorityQ = new MinPQ<>();
-    Node solvedNode = null;
 
-    Board initialBoard = null;
+    private Node solvedNode = null;
+
+    private Board initialBoard = null;
 
 
     public Solver(Board initial) {
@@ -18,17 +18,18 @@ public class Solver {
             throw new IllegalArgumentException();
         }
         this.initialBoard = initial;
-        Board twinBoard = initial.twin();
 
-        priorityQ.insert(new Node(initial, 0, null));
-        priorityQ.insert(new Node(twinBoard, 0, null));
-
-        int max_steps = initial.dimension() * initial.dimension() * 1000;
-        this.solvedNode = solvePuzzle(priorityQ, max_steps);
+        int max_steps = initial.dimension() * initial.dimension() * 1000000;
+        this.solvedNode = solvePuzzle(initial, max_steps);
 
     }
 
-    private static Node solvePuzzle(MinPQ<Node> priorityQ, int max_steps) {
+    private static Node solvePuzzle(Board initialBoard, int max_steps) {
+        Board twinBoard = initialBoard.twin();
+        MinPQ<Node> priorityQ = new MinPQ<>();
+        priorityQ.insert(new Node(initialBoard, 0, null));
+        priorityQ.insert(new Node(twinBoard, 0, null));
+
         int steps = 0;
         while (!priorityQ.isEmpty() && steps++ < max_steps) {
             Node minNode = priorityQ.delMin();
@@ -39,6 +40,7 @@ public class Solver {
 
             //Check if reach the goal
             if (theBoard.isGoal()) {
+                //System.out.println("Finish with steps:" + steps);
                 return minNode;
             }
 
@@ -63,6 +65,7 @@ public class Solver {
             }
 
         }
+
         return null;
     }
 
@@ -144,6 +147,16 @@ public class Solver {
         Iterable<Board> iter = null;
 
         titles = new int[][]{
+                {7, 8, 5},
+                {4, 0, 2},
+                {3, 6, 1}
+        };
+        board = new Board(titles);
+        solver = new Solver(board);
+        assert solver.isSolvable();
+        System.out.println(solver.moves());
+
+        titles = new int[][]{
 //                {0, 1, 3},
 //                {4, 2, 5},
 //                {7, 8, 6}
@@ -156,6 +169,7 @@ public class Solver {
         };
         board = new Board(titles);
         solver = new Solver(board);
+
 
         int i = 0;
 //        for (Iterator<Board> b = solver.getMoveHistory(); b.hasNext(); i++) {
