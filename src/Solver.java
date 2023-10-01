@@ -46,21 +46,21 @@ public class Solver {
 
             for (Board newBoard : minNode.board.neighbors()) {
                 Node prevNode = minNode.previousNode;
-                boolean skipThisBoard = false;
-                while (prevNode != null) {
-                    if (newBoard.equals(prevNode.board)) {
-                        skipThisBoard = true;
-                        break;
-                    }
-                    prevNode = prevNode.previousNode;
-                }
-                if (skipThisBoard) {
-                    continue;
-                }
-//                if (minNode.previousNode != null && newBoard.equals(minNode.previousNode.board)) {
-//                    //skip duplicated run
+//                boolean skipThisBoard = false;
+//                while (prevNode != null) {
+//                    if (newBoard.equals(prevNode.board)) {
+//                        skipThisBoard = true;
+//                        break;
+//                    }
+//                    prevNode = prevNode.previousNode;
+//                }
+//                if (skipThisBoard) {
 //                    continue;
 //                }
+                if (minNode.previousNode != null && newBoard.equals(minNode.previousNode.board)) {
+                    //skip duplicated run
+                    continue;
+                }
                 priorityQ.insert(new Node(newBoard, minNode.moves + 1, minNode));
             }
 
@@ -117,8 +117,12 @@ public class Solver {
 
     private static class Node implements Comparable<Node> {
         int moves = 0;
+
+        private static final int INVALID = -1;
         Node previousNode = null;
         Board board = null;
+
+        int cached_priority = INVALID;
 
         Node(Board board, int moves, Node previous) {
             this.board = board;
@@ -127,15 +131,23 @@ public class Solver {
         }
 
         int manhatten_priority() {
-            return board.manhattan() + moves;
+            if (cached_priority != INVALID)
+                return cached_priority + moves;
+            cached_priority = board.manhattan();
+            return cached_priority + moves;
         }
 
         int hamming_priority() {
-            return board.hamming() + moves;
+            if (cached_priority != INVALID)
+                return cached_priority + moves;
+            cached_priority = board.hamming();
+            return cached_priority + moves;
         }
 
         @Override
         public int compareTo(Node o) {
+
+
             return this.manhatten_priority() - o.manhatten_priority();
         }
     }
