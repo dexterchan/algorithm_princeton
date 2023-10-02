@@ -1,4 +1,4 @@
-/******************************************************************************
+package Collinear; /******************************************************************************
  *  Compilation:  javac Point.java
  *  Execution:    java Point
  *  Dependencies: none
@@ -12,14 +12,14 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdDraw;
 
 import java.util.Comparator;
-import java.util.Arrays;
 
 public class Point implements Comparable<Point> {
 
     private final int x;     // x-coordinate of this point
     private final int y;     // y-coordinate of this point
 
-    private final double MAX_SLOPE = 10^9;
+    private final double POSITIVE_MAX_SLOPE = Double.POSITIVE_INFINITY;
+    private final double NEGATIVE_MAX_SLOPE = Double.NEGATIVE_INFINITY;
 
     /**
      * Initializes a new point.
@@ -65,10 +65,25 @@ public class Point implements Comparable<Point> {
      */
     public double slopeTo(Point that) {
         /* YOUR CODE HERE */
-        if (that.x != this.x)
+        if (that == null) {
+            throw new NullPointerException("Point is null");
+        }
+
+        if (this.compareTo(that) == 0) {
+            return NEGATIVE_MAX_SLOPE;
+        }
+
+        if (that.x == this.x) {
+            return this.POSITIVE_MAX_SLOPE;
+        }
+
+        if (this.y == that.y) {
+            return 0;
+        } else {
             return ((double) (that.y - this.y)) / (that.x - this.x);
-        else
-            return this.MAX_SLOPE;
+        }
+
+
     }
 
     /**
@@ -84,7 +99,10 @@ public class Point implements Comparable<Point> {
      * argument point
      */
     public int compareTo(Point that) {
-        /* YOUR CODE HERE */
+        if (that == null) {
+            throw new NullPointerException("Point is null");
+        }
+
         if (this.y != that.y) {
             return this.y - that.y;
         }
@@ -102,8 +120,8 @@ public class Point implements Comparable<Point> {
         return new Comparator<Point>() {
             @Override
             public int compare(Point o1, Point o2) {
-                double slope1 = o1.slopeTo(Point.this);
-                double slope2 = o2.slopeTo(Point.this);
+                double slope1 = Point.this.slopeTo(o1);
+                double slope2 = Point.this.slopeTo(o2);
                 return Double.compare(slope1, slope2);
             }
         };
@@ -137,18 +155,54 @@ public class Point implements Comparable<Point> {
             points[i] = new Point(x, y);
         }
 
-        Arrays.sort(points);
-        for (Point p : points)
-            System.out.println(p.toString());
+//        Arrays.sort(points);
+//        for (Point p : points)
+//            System.out.println(p.toString());
+        Point p, q, r;
 
-        // draw the points
-        StdDraw.enableDoubleBuffering();
-        StdDraw.setXscale(0, 32768);
-        StdDraw.setYscale(0, 32768);
-        for (Point p : points) {
-            p.draw();
-        }
-        StdDraw.show();
+        p = new Point(0, 2);
+        q = new Point(0, 5);
+        r = new Point(0, 2);
+        assert p.slopeTo(q) == Double.POSITIVE_INFINITY;
+        assert p.slopeTo(r) == Double.NEGATIVE_INFINITY;
+        assert p.slopeOrder().compare(q, r) == 1;
+
+
+        //Test symmetry
+        p = new Point(193, 293);
+        q = new Point(193, 115);
+        assert p.slopeTo(q) == Double.POSITIVE_INFINITY;
+        assert q.slopeTo(p) == Double.POSITIVE_INFINITY;
+
+        p = new Point(1, 1);
+        q = new Point(1, 1);
+        assert p.slopeTo(q) == Double.NEGATIVE_INFINITY;
+
+        p = new Point(332, 313);
+        q = new Point(332, 229);
+        r = new Point(403, 111);
+        assert p.slopeOrder().compare(q, r) == 1;
+
+        p = new Point(1, 1);
+        q = new Point(1, 100);
+        r = new Point(1, 100);
+        assert p.slopeOrder().compare(q, r) == 0;
+
+        p = new Point(1, 1);
+        q = new Point(1, -100);
+        r = new Point(1, 100);
+        assert p.slopeOrder().compare(q, r) == 0;
+
+
+//        // draw the points
+//        StdDraw.enableDoubleBuffering();
+//        StdDraw.setXscale(0, 32768);
+//        StdDraw.setYscale(0, 32768);
+//        for (Point p : points) {
+//            p.draw();
+//        }
+//
+//        StdDraw.show();
     }
 
 
