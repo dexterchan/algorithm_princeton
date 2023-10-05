@@ -57,7 +57,7 @@ public class RectHV {
 
     public boolean intersects(RectHV that) {
         // does this rectangle intersect that rectangle (at one or more points)?
-        if (that == null){
+        if (that == null) {
             throw new IllegalArgumentException();
         }
         RectHV leftRect = this.upperLeft.compareTo(that.upperLeft) < 0 ? this : that;
@@ -71,13 +71,13 @@ public class RectHV {
         double highY1 = leftRect.ymax();
         double lowY2 = rightRect.ymin();
         //windowing to find overlap
-        if (leftRect.ymin() >= rightRect.ymin()) {
+        if (leftRect.ymin() > rightRect.ymin()) {
             lowY1 = rightRect.ymin();
             highY1 = rightRect.ymax();
             lowY2 = leftRect.ymin();
         }
         assert lowY1 <= lowY2;
-        if (highY1 < lowY2) {
+        if (highY1 <= lowY2) {
             return false;
         }
         return true;
@@ -90,7 +90,7 @@ public class RectHV {
 
     public double distanceSquaredTo(Point2D p) {
         // square of Euclidean distance from point p to closest point in rectangle
-        if (p == null){
+        if (p == null) {
             throw new IllegalArgumentException();
         }
         //check if p in rectangle
@@ -140,11 +140,20 @@ public class RectHV {
         return "(" + this.upperLeft + "," + this.lowerRight + ")";
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         //Testing intersects
-        RectHV h1 = new RectHV(0.4,0.3, 0.8, 0.6);
+        RectHV h1 = new RectHV(0.4, 0.3, 0.8, 0.6);
         RectHV h2 = new RectHV(0.7, 0.35, 1, 0.5);
 
         assert h1.intersects(h2);
+
+        System.out.println(h1.distanceTo(new Point2D(0, 0)));
+
+        assert !h1.intersects(new RectHV(-0.1, -0.5, 0.3, 0.8));
+        assert h1.intersects(new RectHV(-0.1, -0.5, 0.5, 0.8));
+        assert h1.intersects(new RectHV(-0.1, -0.5, 0.8, 0.8));
+        assert !h1.intersects(new RectHV(-0.1, -0.5, 0.8, 0.3));
+        assert !h1.intersects(new RectHV(-0.1, -0.5, 0.8, 0.29));
+
     }
 }
