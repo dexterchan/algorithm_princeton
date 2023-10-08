@@ -257,7 +257,7 @@ public class KdTree {
             if (node.left != null){
                 RectHV newArena = createLeft(node.dimension, curPoint, arena);
                 double distArena = newArena.distanceSquaredTo(p);
-                if (distArena <= closestDist){
+                if (distArena < closestDist){
                     stack.push(new NodeRect(node.left, newArena));
                 }
             }
@@ -266,7 +266,7 @@ public class KdTree {
             if (node.right != null){
                 RectHV newArena = createRight(node.dimension, curPoint, arena);
                 double distArena = newArena.distanceSquaredTo(p);
-                if (distArena <= closestDist){
+                if (distArena < closestDist){
                     stack.push(new NodeRect(node.right, newArena));
                 }
             }
