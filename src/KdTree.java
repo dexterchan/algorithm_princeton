@@ -12,6 +12,17 @@ public class KdTree {
     private static final double MIN_DIM = 0;
     private static final double MAX_DIM = 1;
 
+    private static final double MAX_DIST_SQUARED = (MAX_DIM * MAX_DIM) * 2;
+
+    private class NodeRect{
+        Node node;
+        RectHV arena;
+        NodeRect(Node node, RectHV arena){
+            this.node = node;
+            this.arena = arena;
+        }
+    }
+
     private class Node {
         Point2D value;
 
@@ -152,40 +163,46 @@ public class KdTree {
             throw new IllegalArgumentException();
         }
         List<Point2D> finalAns = new LinkedList<>();
-        Stack<Node> stack = new Stack<>();
-        stack.push(this.root);
+        Stack<NodeRect> stack = new Stack<>();
+        stack.push(new NodeRect(
+                this.root,
+                new RectHV(MIN_DIM, MIN_DIM, MAX_DIM, MAX_DIM)
+        ));
 
         while (!stack.isEmpty()) {
-            Node node = stack.pop();
+            NodeRect nodeRect = stack.pop();
+            Node node = nodeRect.node;
+            RectHV arena = nodeRect.arena;
             Point2D point = node.value;
+
             if (rect.contains(point)) {
                 finalAns.add(point);
             }
-
-            //Check left subtree
-            if (node.left != null) {
-                RectHV leftRect = createLeft(node.dimension, point);
-                if (leftRect.intersects(rect)) {
-                    stack.push(node.left);
+            //Check left
+            if (node.left != null){
+                RectHV newArena = createLeft(node.dimension, point, arena);
+                if (newArena.intersects(rect)){
+                    stack.push(new NodeRect(node.left, newArena));
+                }
+            }
+            //Check right
+            if (node.right !=null){
+                RectHV newArena = createRight(node.dimension, point, arena);
+                if (newArena.intersects(rect)){
+                    stack.push(new NodeRect(node.right, newArena));
                 }
             }
 
-            //Check right substree
-            if (node.right != null) {
-                RectHV rightRect = createRight(node.dimension, point);
-                if (rightRect.intersects(rect)) {
-                    stack.push(node.right);
-                }
-            }
+
         }
         return finalAns;
     }
 
-    private static RectHV createLeft(int dimension, Point2D pt) {
-        double xmin = MIN_DIM;
-        double xmax = MAX_DIM;
-        double ymin = MIN_DIM;
-        double ymax = MAX_DIM;
+    private static RectHV createLeft(int dimension, Point2D pt, RectHV arena) {
+        double xmin = arena.xmin();
+        double xmax = arena.xmax();
+        double ymin = arena.ymin();
+        double ymax = arena.ymax();
         if (dimension == 0) {
             //coor-x
             xmax = pt.x();
@@ -196,11 +213,11 @@ public class KdTree {
         return new RectHV(xmin, ymin, xmax, ymax);
     }
 
-    private static RectHV createRight(int dimension, Point2D pt) {
-        double xmin = MIN_DIM;
-        double xmax = MAX_DIM;
-        double ymin = MIN_DIM;
-        double ymax = MAX_DIM;
+    private static RectHV createRight(int dimension, Point2D pt, RectHV arena) {
+        double xmin = arena.xmin();
+        double xmax = arena.xmax();
+        double ymin = arena.ymin();
+        double ymax = arena.ymax();
         if (dimension == 0) {
             //coor-x
             xmin = pt.x();
@@ -213,7 +230,49 @@ public class KdTree {
 
     public Point2D nearest(Point2D p) {
         // a nearest neighbor in the set to point p; null if the set is empty
-        return null;
+        if (p == null){
+            throw new IllegalArgumentException();
+        }
+        if (this.isEmpty())
+            return null;
+        Point2D closestPoint = null;
+        double closestDist = MAX_DIST_SQUARED;
+
+        Stack<NodeRect> stack = new Stack<>();
+        stack.push(new NodeRect(this.root, new RectHV(MIN_DIM, MIN_DIM, MAX_DIM, MAX_DIM)));
+
+        while (!stack.isEmpty()){
+            NodeRect nodeRect = stack.pop();
+            Node node = nodeRect.node;
+            RectHV arena = nodeRect.arena;
+            Point2D curPoint = node.value;
+
+            double dist = curPoint.distanceSquaredTo(p);
+            if (dist < closestDist){
+                closestDist = dist;
+                closestPoint = curPoint;
+            }
+
+            //Check left
+            if (node.left != null){
+                RectHV newArena = createLeft(node.dimension, curPoint, arena);
+                double distArena = newArena.distanceSquaredTo(p);
+                if (distArena <= closestDist){
+                    stack.push(new NodeRect(node.left, newArena));
+                }
+            }
+            
+            //Check right
+            if (node.right != null){
+                RectHV newArena = createRight(node.dimension, curPoint, arena);
+                double distArena = newArena.distanceSquaredTo(p);
+                if (distArena <= closestDist){
+                    stack.push(new NodeRect(node.right, newArena));
+                }
+            }
+        }
+
+        return closestPoint;
     }
 
     public static void main(String[] args) {
@@ -223,6 +282,7 @@ public class KdTree {
         //Check contains
         testContains();
         testRange();
+        testNearest();
     }
 
     private static void testContains() {
@@ -270,5 +330,31 @@ public class KdTree {
         assert ans.contains(new Point2D(.9,0.6));
 
     }
+
+    private static void testNearest(){
+        KdTree kdTree = new KdTree();
+        kdTree.insert(new Point2D(0.7, 0.2));
+        kdTree.insert(new Point2D(0.5, 0.4));
+        kdTree.insert(new Point2D(0.2, 0.3));
+        kdTree.insert(new Point2D(0.4, 0.7));
+        kdTree.insert(new Point2D(0.9, 0.6));
+
+        Point2D checkPoint = null;
+        Point2D closestPoint = null;
+
+        checkPoint = new Point2D(0.1, 0.5);
+        closestPoint = kdTree.nearest(checkPoint);
+        assert closestPoint.equals(new Point2D(0.2, 0.3));
+
+        checkPoint = new Point2D(0.8, 0.1);
+        closestPoint = kdTree.nearest(checkPoint);
+        assert closestPoint.equals(new Point2D(0.7, 0.2));
+
+        checkPoint = new Point2D(0.8, 0.5);
+        closestPoint = kdTree.nearest(checkPoint);
+        assert closestPoint.equals(new Point2D(0.9, 0.6));
+    }
+
+
 
 }
