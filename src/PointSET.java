@@ -1,6 +1,7 @@
 
 import edu.princeton.cs.algs4.StdDraw;
-
+import edu.princeton.cs.algs4.Point2D;
+import edu.princeton.cs.algs4.RectHV;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -11,7 +12,7 @@ public class PointSET {
 
     public PointSET() {
         // construct an empty set of points
-        tree = new TreeSet();
+        tree = new TreeSet<Point2D>();
     }
 
     public boolean isEmpty() {
@@ -49,6 +50,9 @@ public class PointSET {
 
     public Iterable<Point2D> range(RectHV rect) {
         // all points that are inside the rectangle (or on the boundary)
+        if (rect==null){
+            throw new IllegalArgumentException();
+        }
         List<Point2D> l = new LinkedList<>();
         for (Point2D p : this.tree) {
             if (rect.contains(p)) {
@@ -65,7 +69,7 @@ public class PointSET {
             throw new IllegalArgumentException();
         }
         if (this.tree.isEmpty()) {
-            throw new IllegalStateException();
+            return null;
         }
         Point2D nearestPoint = null;
         for (Point2D s : this.tree) {
@@ -81,6 +85,7 @@ public class PointSET {
     public static void main(String[] args) {
         // unit testing of the methods (optional)
         PointSET ps = new PointSET();
+
         ps.insert(new Point2D(0.7, 0.2));
         ps.insert(new Point2D(0.5, 0.4));
         ps.insert(new Point2D(0.2,0.3));
@@ -89,5 +94,7 @@ public class PointSET {
 
         Point2D n = ps.nearest(new Point2D(0.5, 0.8));
         assert n.equals(new Point2D(0.4,0.7));
+
+        //ps.nearest(null);
     }
 }

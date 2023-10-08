@@ -1,10 +1,10 @@
 import edu.princeton.cs.algs4.StdDraw;
 
-public class Point2D implements Comparable<Point2D> {
+public class Point2D_notneed implements Comparable<Point2D_notneed> {
     private final double x;
     private final double y;
 
-    public Point2D(double x, double y) {
+    public Point2D_notneed(double x, double y) {
         // construct the point (x, y)
         this.x = x;
         this.y = y;
@@ -20,7 +20,7 @@ public class Point2D implements Comparable<Point2D> {
         return this.y;
     }
 
-    public double distanceTo(Point2D that) {
+    public double distanceTo(Point2D_notneed that) {
         // Euclidean distance between two points
         if (that == null)
             throw new IllegalArgumentException();
@@ -28,7 +28,7 @@ public class Point2D implements Comparable<Point2D> {
         return Math.sqrt(this.distanceSquaredTo(that));
     }
 
-    public double distanceSquaredTo(Point2D that) {
+    public double distanceSquaredTo(Point2D_notneed that) {
         // square of Euclidean distance between two points
         if (that == null)
             throw new IllegalArgumentException();
@@ -38,7 +38,7 @@ public class Point2D implements Comparable<Point2D> {
         return distX * distX + distY * distY;
     }
 
-    public int compareTo(Point2D that) {
+    public int compareTo(Point2D_notneed that) {
         // for use in an ordered symbol table
         if (that == null)
             throw new IllegalArgumentException();
@@ -62,11 +62,11 @@ public class Point2D implements Comparable<Point2D> {
             throw new IllegalArgumentException();
         }
 
-        if (!(that instanceof Point2D)) {
+        if (!(that instanceof Point2D_notneed)) {
             return false;
         }
 
-        Point2D thatPoint = (Point2D) that;
+        Point2D_notneed thatPoint = (Point2D_notneed) that;
         return (this.x == thatPoint.x) && (this.y == thatPoint.y);
     }
 

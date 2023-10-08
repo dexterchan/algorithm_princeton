@@ -1,24 +1,24 @@
 import edu.princeton.cs.algs4.StdDraw;
 
-public class RectHV {
-    private final Point2D upperLeft;
-    private final Point2D lowerRight;
+public class RectHV_notneed {
+    private final Point2D_notneed upperLeft;
+    private final Point2D_notneed lowerRight;
 
-    private final Point2D lowerLeft;
+    private final Point2D_notneed lowerLeft;
 
-    private final Point2D upperRight;
+    private final Point2D_notneed upperRight;
 
-    public RectHV(double xmin, double ymin, double xmax, double ymax) {
+    public RectHV_notneed(double xmin, double ymin, double xmax, double ymax) {
         // construct the rectangle [xmin, xmax] x [ymin, ymax]
         // throw an IllegalArgumentException if (xmin > xmax) or (ymin > ymax)
 
         if ((xmin > xmax) || (ymin > ymax)) {
             throw new IllegalArgumentException("(xmin > xmax) or (ymin > ymax)");
         }
-        this.upperLeft = new Point2D(xmin, ymax);
-        this.lowerRight = new Point2D(xmax, ymin);
-        this.lowerLeft = new Point2D(xmin, ymin);
-        this.upperRight = new Point2D(xmax, ymax);
+        this.upperLeft = new Point2D_notneed(xmin, ymax);
+        this.lowerRight = new Point2D_notneed(xmax, ymin);
+        this.lowerLeft = new Point2D_notneed(xmin, ymin);
+        this.upperRight = new Point2D_notneed(xmax, ymax);
 
     }
 
@@ -42,7 +42,7 @@ public class RectHV {
         return this.upperLeft.y();
     }
 
-    public boolean contains(Point2D p) {
+    public boolean contains(Point2D_notneed p) {
         // does this rectangle contain the point p (either inside or on boundary)?
         if (p == null) {
             throw new IllegalArgumentException();
@@ -55,13 +55,13 @@ public class RectHV {
         return false;
     }
 
-    public boolean intersects(RectHV that) {
+    public boolean intersects(RectHV_notneed that) {
         // does this rectangle intersect that rectangle (at one or more points)?
         if (that == null) {
             throw new IllegalArgumentException();
         }
-        RectHV leftRect = this.upperLeft.compareTo(that.upperLeft) < 0 ? this : that;
-        RectHV rightRect = leftRect.equals(this) ? that : this;
+        RectHV_notneed leftRect = this.upperLeft.compareTo(that.upperLeft) < 0 ? this : that;
+        RectHV_notneed rightRect = leftRect.equals(this) ? that : this;
         //Find overlapping along x-coordinates
         if (rightRect.xmin() > leftRect.xmax()) {
             return false;
@@ -83,12 +83,12 @@ public class RectHV {
         return true;
     }
 
-    public double distanceTo(Point2D p) {
+    public double distanceTo(Point2D_notneed p) {
         // Euclidean distance from point p to closest point in rectangle
         return Math.sqrt(this.distanceSquaredTo(p));
     }
 
-    public double distanceSquaredTo(Point2D p) {
+    public double distanceSquaredTo(Point2D_notneed p) {
         // square of Euclidean distance from point p to closest point in rectangle
         if (p == null) {
             throw new IllegalArgumentException();
@@ -123,10 +123,10 @@ public class RectHV {
         if (that == null) {
             throw new IllegalArgumentException();
         }
-        if (!(that instanceof RectHV)) {
+        if (!(that instanceof RectHV_notneed)) {
             throw new IllegalArgumentException();
         }
-        RectHV r = (RectHV) that;
+        RectHV_notneed r = (RectHV_notneed) that;
         return this.upperLeft.equals(r.upperLeft) && this.lowerRight.equals(r.lowerRight);
     }
 
@@ -142,18 +142,18 @@ public class RectHV {
 
     public static void main(String[] args) {
         //Testing intersects
-        RectHV h1 = new RectHV(0.4, 0.3, 0.8, 0.6);
-        RectHV h2 = new RectHV(0.7, 0.35, 1, 0.5);
+        RectHV_notneed h1 = new RectHV_notneed(0.4, 0.3, 0.8, 0.6);
+        RectHV_notneed h2 = new RectHV_notneed(0.7, 0.35, 1, 0.5);
 
         assert h1.intersects(h2);
 
-        System.out.println(h1.distanceTo(new Point2D(0, 0)));
+        System.out.println(h1.distanceTo(new Point2D_notneed(0, 0)));
 
-        assert !h1.intersects(new RectHV(-0.1, -0.5, 0.3, 0.8));
-        assert h1.intersects(new RectHV(-0.1, -0.5, 0.5, 0.8));
-        assert h1.intersects(new RectHV(-0.1, -0.5, 0.8, 0.8));
-        assert !h1.intersects(new RectHV(-0.1, -0.5, 0.8, 0.3));
-        assert !h1.intersects(new RectHV(-0.1, -0.5, 0.8, 0.29));
+        assert !h1.intersects(new RectHV_notneed(-0.1, -0.5, 0.3, 0.8));
+        assert h1.intersects(new RectHV_notneed(-0.1, -0.5, 0.5, 0.8));
+        assert h1.intersects(new RectHV_notneed(-0.1, -0.5, 0.8, 0.8));
+        assert !h1.intersects(new RectHV_notneed(-0.1, -0.5, 0.8, 0.3));
+        assert !h1.intersects(new RectHV_notneed(-0.1, -0.5, 0.8, 0.29));
 
     }
 }
