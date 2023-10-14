@@ -1,7 +1,9 @@
+import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 public class Percolation {
     private class QuickFind {
         int[] id = null;
         int[] sz = null;
+        boolean compressPath = false;
 
         QuickFind(int n) {
             this.id = new int[n];
@@ -10,12 +12,14 @@ public class Percolation {
                 this.id[i] = i;
                 this.sz[i] = 1;
             }
+
         }
 
         int find(int value) {
             int inx = value;
             while (this.id[inx] != inx) {
-                this.id[inx] = this.id[this.id[inx]];//compress path here!
+                //Slower 5% slow with the condition
+                //if (compressPath) this.id[inx] = this.id[this.id[inx]];//compress path here!
                 inx = this.id[inx];
             }
             return inx;
