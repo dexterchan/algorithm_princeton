@@ -10,9 +10,9 @@ public class PercolationStats {
 
     // perform independent trials on an n-by-n grid
     public PercolationStats(int n, int trials) {
-        if (n < 0)
+        if (n <= 0)
             throw new IllegalArgumentException();
-        if (trials < 0)
+        if (trials <= 0)
             throw new IllegalArgumentException();
 
         results = new double[trials];
@@ -44,7 +44,7 @@ public class PercolationStats {
 
             if (p.percolates()) {
                 double v = (double) (i + 1) / (double) total;
-                System.out.println("Found precolate: " + (i + 1) + ":" + v);
+                //System.out.println("Found precolate: " + (i + 1) + ":" + v);
                 return v;
             }
         }
