@@ -12,7 +12,7 @@ public class Percolation {
             }
         }
 
-        int root(int value) {
+        int find(int value) {
             int inx = value;
             while (this.id[inx] != inx) {
                 this.id[inx] = this.id[this.id[inx]];//compress path here!
@@ -22,7 +22,7 @@ public class Percolation {
         }
 
         boolean is_connected(int x, int y) {
-            return this.root(x) == this.root(y);
+            return this.find(x) == this.find(y);
         }
 
         void union(int x, int y) {
@@ -30,8 +30,8 @@ public class Percolation {
                 return;
             }
 
-            int rootX = this.root(x);
-            int rootY = this.root(y);
+            int rootX = this.find(x);
+            int rootY = this.find(y);
 
             if (this.sz[rootX] < this.sz[rootY]) {
                 //merge to Y
@@ -149,16 +149,30 @@ public class Percolation {
 
     // does the system percolate?
     public boolean percolates() {
+        boolean[] buffer = new boolean[this.size * this.size];
         //Scan upper row
-        for (int uc = 1; uc <= this.size; uc++) {
-            for (int lc = 1; lc <= this.size; lc++) {
-                int uAddress = address(1, uc, this.size);
-                int lAddress = address(this.size, lc, this.size);
-                if (this.quickFind.is_connected(uAddress, lAddress)) {
-                    return true;
-                }
-            }
+        //Reduce the time complexity to N
+        //Trade off: memory grow to N^2
+        for (int i=1;i<=this.size;i++){
+            int uaddress = address(1, i, this.size);
+            int v = this.quickFind.find(uaddress);
+            buffer[v] = true;
         }
+        for (int i=1;i<=this.size;i++){
+            int laddress = address(this.size, i, this.size);
+            int v = this.quickFind.find(laddress);
+            if (buffer[v]) return true;
+        }
+//
+//        for (int uc = 1; uc <= this.size; uc++) {
+//            for (int lc = 1; lc <= this.size; lc++) {
+//                int uAddress = address(1, uc, this.size);
+//                int lAddress = address(this.size, lc, this.size);
+//                if (this.quickFind.is_connected(uAddress, lAddress)) {
+//                    return true;
+//                }
+//            }
+//        }
         return false;
     }
 

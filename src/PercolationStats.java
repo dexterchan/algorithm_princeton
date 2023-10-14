@@ -1,5 +1,6 @@
 import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.StdRandom;
+import edu.princeton.cs.algs4.Stopwatch;
 
 public class PercolationStats {
     double[] results = null;
@@ -91,8 +92,10 @@ public class PercolationStats {
         int N = Integer.parseInt(args[0]);
         int trial = Integer.parseInt(args[1]);
 
+        Stopwatch stopwatch = new Stopwatch();
         PercolationStats stats = new PercolationStats(N, trial);
-
+        double time = stopwatch.elapsedTime();
+        StdOut.printf("Time consumed = %f\n", time);
         StdOut.printf("mean                    = %f\n", stats.mean());
         StdOut.printf("std                    = %f\n", stats.stddev());
         StdOut.printf("confidenceLo                    = %f\n", stats.confidenceLo());
