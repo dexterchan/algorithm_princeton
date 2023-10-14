@@ -53,7 +53,7 @@ public class Percolation {
     }
 
     private int size;
-    private QuickFind quickFind;
+    private WeightedQuickUnionUF quickFind;
 
 
     private boolean[] grid = null;
@@ -65,7 +65,7 @@ public class Percolation {
             throw new IllegalArgumentException();
         }
         this.size = n;
-        this.quickFind = new QuickFind(n * n);
+        this.quickFind = new WeightedQuickUnionUF(n * n);
         this.grid = new boolean[n * n];
 
         for (int i = 0; i < n * n; i++) {
