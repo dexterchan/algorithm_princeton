@@ -3,10 +3,10 @@ import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.Stopwatch;
 
 public class PercolationStats {
-    double[] results = null;
-    int N;
+    private double[] results = null;
+    private int N;
 
-    int trials;
+    private int trials;
 
     // perform independent trials on an n-by-n grid
     public PercolationStats(int n, int trials) {

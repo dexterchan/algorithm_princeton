@@ -1,4 +1,5 @@
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
+
 public class Percolation {
     private class QuickFind {
         int[] id = null;
@@ -48,7 +49,7 @@ public class Percolation {
         }
     }
 
-    static int address(int row, int col, int N) {
+    private static int address(int row, int col, int N) {
         return (row - 1) * N + (col - 1);
     }
 
@@ -72,12 +73,23 @@ public class Percolation {
             this.grid[i] = false;
         }
         // the row and column indices are integers between 1 and n, where (1, 1) is the upper-left site
+        //Prepare Top row open sites
+        for (int i = 2; i <= this.size; i++) {
+            int ad = address(1, i, this.size);
+            this.quickFind.union(0, ad);
+        }
+        //Prepare bottom row open sites
+        int lastRowAddress = address(this.size, 1, this.size);
+        for (int i = 2; i <= this.size; i++) {
+            int ad = address(this.size, i, this.size);
+            this.quickFind.union(lastRowAddress, ad);
+        }
     }
 
     private boolean checkRowColValid(int row, int col) {
-        if (row < 0 || row > this.size)
+        if (row <= 0 || row > this.size)
             return false;
-        if (col < 0 || col > this.size)
+        if (col <= 0 || col > this.size)
             return false;
         return true;
     }
@@ -142,8 +154,9 @@ public class Percolation {
         if (!this.checkRowColValid(row, col)) {
             throw new IllegalArgumentException();
         }
-
-        return !this.isOpen(row, col);
+        int h = address(row, col, this.size);
+        int firstCellAddress = address(1, 1, this.size);
+        return this.quickFind.find(h) == this.quickFind.find(firstCellAddress);
     }
 
     // returns the number of open sites
@@ -153,20 +166,22 @@ public class Percolation {
 
     // does the system percolate?
     public boolean percolates() {
-        boolean[] buffer = new boolean[this.size * this.size];
-        //Scan upper row
-        //Reduce the time complexity to N
-        //Trade off: memory grow to N^2
-        for (int i=1;i<=this.size;i++){
-            int uaddress = address(1, i, this.size);
-            int v = this.quickFind.find(uaddress);
-            buffer[v] = true;
-        }
-        for (int i=1;i<=this.size;i++){
-            int laddress = address(this.size, i, this.size);
-            int v = this.quickFind.find(laddress);
-            if (buffer[v]) return true;
-        }
+
+        return isFull(this.size, this.size);
+//        boolean[] buffer = new boolean[this.size * this.size];
+//        //Scan upper row
+//        //Reduce the time complexity to N
+//        //Trade off: memory grow to N^2
+//        for (int i = 1; i <= this.size; i++) {
+//            int uaddress = address(1, i, this.size);
+//            int v = this.quickFind.find(uaddress);
+//            buffer[v] = true;
+//        }
+//        for (int i = 1; i <= this.size; i++) {
+//            int laddress = address(this.size, i, this.size);
+//            int v = this.quickFind.find(laddress);
+//            if (buffer[v]) return true;
+//        }
 //
 //        for (int uc = 1; uc <= this.size; uc++) {
 //            for (int lc = 1; lc <= this.size; lc++) {
@@ -177,7 +192,7 @@ public class Percolation {
 //                }
 //            }
 //        }
-        return false;
+//        return false;
     }
 
     // test client (optional)
@@ -202,5 +217,9 @@ public class Percolation {
 
         pl.open(3, 2);
         assert pl.percolates();
+
+        pl = new Percolation(3);
+        assert pl.isOpen(1, 1);
+
     }
 }
