@@ -58,7 +58,9 @@ public class Percolation {
 
 
     private boolean[] grid = null;
+    private byte[] backwash;
     private int numOpen = 0;
+    private boolean perc = false;
 
     // creates n-by-n grid, with all sites initially blocked
     public Percolation(int n) {
@@ -68,22 +70,24 @@ public class Percolation {
         this.size = n;
         this.quickFind = new WeightedQuickUnionUF(n * n);
         this.grid = new boolean[n * n];
+        this.backwash = new byte[n * n];
 
         for (int i = 0; i < n * n; i++) {
             this.grid[i] = false;
+            this.backwash[i] = 0;
         }
-        // the row and column indices are integers between 1 and n, where (1, 1) is the upper-left site
-        //Prepare Top row open sites
-        for (int i = 2; i <= this.size; i++) {
-            int ad = address(1, i, this.size);
-            this.quickFind.union(0, ad);
-        }
-        //Prepare bottom row open sites
-        int lastRowAddress = address(this.size, 1, this.size);
-        for (int i = 2; i <= this.size; i++) {
-            int ad = address(this.size, i, this.size);
-            this.quickFind.union(lastRowAddress, ad);
-        }
+//        // the row and column indices are integers between 1 and n, where (1, 1) is the upper-left site
+//        //Prepare Top row open sites
+//        for (int i = 2; i <= this.size; i++) {
+//            int ad = address(1, i, this.size);
+//            this.quickFind.union(0, ad);
+//        }
+//        //Prepare bottom row open sites
+//        int lastRowAddress = address(this.size, 1, this.size);
+//        for (int i = 2; i <= this.size; i++) {
+//            int ad = address(this.size, i, this.size);
+//            this.quickFind.union(lastRowAddress, ad);
+//        }
     }
 
     private boolean checkRowColValid(int row, int col) {
@@ -106,6 +110,15 @@ public class Percolation {
             return;
         }
 
+        byte connectionStatus = 0;
+        // check top or bottom
+        if (row == 1) {
+            connectionStatus = 2;
+        }
+        if (row == this.size) {
+            connectionStatus = (byte) (connectionStatus | 1);
+        }
+
         this.grid[i] = true;
         this.numOpen++;
 
@@ -113,29 +126,43 @@ public class Percolation {
         if (row - 1 >= 1) {
             //Up
             if (isOpen(row - 1, col)) {
-                this.quickFind.union(address(row - 1, col, this.size), i);
+                int naddress = address(row - 1, col, this.size);
+                connectionStatus = (byte) (connectionStatus | this.backwash[this.quickFind.find(naddress)]);
+                this.quickFind.union(naddress, i);
             }
         }
 
         if (col + 1 <= this.size) {
             //right
             if (isOpen(row, col + 1)) {
-                this.quickFind.union(address(row, col + 1, this.size), i);
+                int naddress = address(row, col + 1, this.size);
+                connectionStatus = (byte) (connectionStatus | this.backwash[this.quickFind.find(naddress)]);
+                this.quickFind.union(naddress, i);
             }
         }
 
         if (row + 1 <= this.size) {
             //down
             if (isOpen(row + 1, col)) {
-                this.quickFind.union(address(row + 1, col, this.size), i);
+                int naddress = address(row + 1, col, this.size);
+                connectionStatus = (byte) (connectionStatus | this.backwash[this.quickFind.find(naddress)]);
+                this.quickFind.union(naddress, i);
             }
         }
 
         if (col - 1 >= 1) {
             //left
             if (isOpen(row, col - 1)) {
-                this.quickFind.union(address(row, col - 1, this.size), i);
+                int naddress = address(row, col - 1, this.size);
+                connectionStatus = (byte) (connectionStatus | this.backwash[this.quickFind.find(naddress)]);
+                this.quickFind.union(naddress, i);
             }
+        }
+
+        // set the newRoot status
+        backwash[quickFind.find(i)] = connectionStatus;
+        if (connectionStatus == 3) {
+            perc = true;
         }
     }
 
@@ -154,9 +181,13 @@ public class Percolation {
         if (!this.checkRowColValid(row, col)) {
             throw new IllegalArgumentException();
         }
-        int h = address(row, col, this.size);
-        int firstCellAddress = address(1, 1, this.size);
-        return this.quickFind.find(h) == this.quickFind.find(firstCellAddress);
+//        int h = address(row, col, this.size);
+//        int firstCellAddress = address(1, 1, this.size);
+//        return this.quickFind.find(h) == this.quickFind.find(firstCellAddress);
+        //Check if it is connected to the top
+        int a = address(row, col, this.size);
+        int v = this.backwash[this.quickFind.find(a)];
+        return v >= 2;
     }
 
     // returns the number of open sites
@@ -167,7 +198,7 @@ public class Percolation {
     // does the system percolate?
     public boolean percolates() {
 
-        return isFull(this.size, this.size);
+        return this.perc;
 //        boolean[] buffer = new boolean[this.size * this.size];
 //        //Scan upper row
 //        //Reduce the time complexity to N
@@ -219,7 +250,10 @@ public class Percolation {
         assert pl.percolates();
 
         pl = new Percolation(3);
-        assert pl.isOpen(1, 1);
+        assert !pl.isOpen(1, 1);
+        pl.open(1,1);
+        assert pl.isFull(1,1);
+        assert pl.isOpen(1,1);
 
     }
 }
