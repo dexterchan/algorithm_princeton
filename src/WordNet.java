@@ -81,11 +81,18 @@ public class WordNet {
                     this.edgeTo[w] = v;
                     dfs(g, v, w);
                 } else{// if (w != p) {
-                    for (int x = v; x != w; x = edgeTo[x]) {
-                        cycle.push(x);
+                    Stack<Integer> new_cycle = new Stack<>();
+                    int x = v;
+                    for (; x!=INVALID_STATE && x != w; x = edgeTo[x]) {
+                        new_cycle.push(x);
                     }
-                    cycle.push(w);
-                    cycle.push(v);
+                    if (x!=INVALID_STATE){
+                        new_cycle.push(w);
+                        new_cycle.push(v);
+                        Iterator<Integer> itr = new_cycle.iterator();
+                        while(itr.hasNext()) this.cycle.push(itr.next());
+                    }
+
                 }
 //                } else {
 //                    System.out.println("Exclude case" + p + "," + v);
@@ -327,13 +334,22 @@ public class WordNet {
         cycle = new DiGraphCycle(triangle);
         assert !cycle.hasCycle();
 
+        arbitary = new Digraph(5);
+        arbitary.addEdge(0, 1);
+        arbitary.addEdge(0, 2);
+        arbitary.addEdge(1, 2);
+        arbitary.addEdge(4, 1);
+        cycle = new DiGraphCycle(arbitary);
+        assert !cycle.hasCycle();
+
+
         //example: https://www.baeldung.com/cs/detecting-cycles-in-directed-graph
         arbitary = new Digraph(5);
         arbitary.addEdge(0, 1);
         arbitary.addEdge(0, 2);
         arbitary.addEdge(1, 2);
         arbitary.addEdge(2, 3);
-        //arbitary.addEdge(3, 4); //cause index -1
+        arbitary.addEdge(3, 4); //cause index -1
         arbitary.addEdge(4, 1);
         cycle = new DiGraphCycle(arbitary);
         assert cycle.hasCycle();
