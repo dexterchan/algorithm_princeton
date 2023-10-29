@@ -194,8 +194,9 @@ public class WordNet {
         int num_outdegree_zero = 0;
         for (int i = 0; i < num_vertex; i++) {
             if (digraph.outdegree(i) == 0) num_outdegree_zero++;
-            System.out.println("Root vertex=" + i);
+            //System.out.println("Root vertex=" + i);
         }
+        System.out.println("Detected "+num_outdegree_zero+" root vertex");
         if (num_outdegree_zero != 1) throw new IllegalArgumentException("No root found");
 
         //Check if cyclic found
@@ -262,7 +263,7 @@ public class WordNet {
         testCycleGraph();
 
         var symboltables = testReadSymbSet(args[0]);
-        //var Digraph = testCreateDigraph(symboltables, args[1]);
+        var Digraph = testCreateDigraph(symboltables, args[1]);
 
 
     }
