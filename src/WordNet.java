@@ -1,5 +1,6 @@
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.DirectedCycle;
 
 import java.util.HashSet;
 import java.util.Stack;
@@ -21,7 +22,7 @@ public class WordNet {
         private Stack<Integer> cycle = new Stack<>();
 
         DiGraphCycle(Digraph g) {
-            if (hasParallelEdges(g)) return;
+            //if (hasParallelEdges(g)) return;
 
             marked = new boolean[g.V()];
             edgeTo = new int[g.V()];
@@ -147,9 +148,9 @@ public class WordNet {
         }
     }
 
-    private Digraph digraph;
+    private Digraph digraph = null;
 
-    SymbolTable symbolTables = new SymbolTable();
+    private SymbolTable symbolTables = null;
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
@@ -206,14 +207,20 @@ public class WordNet {
             }
 
         }
-        System.out.println("Detected " + num_outdegree_zero + " root vertex");
+        //System.out.println("Detected " + num_outdegree_zero + " root vertex");
         if (num_outdegree_zero != 1) throw new IllegalArgumentException("No root found");
 
         //Check if cyclic found
-        DiGraphCycle cycle_detector = new DiGraphCycle(digraph);
-        if (cycle_detector.hasCycle()) {
-            throw new IllegalArgumentException("Cycle found");
+        DirectedCycle cycled = new DirectedCycle(digraph);
+        if (cycled.hasCycle()){
+            throw  new IllegalArgumentException("Cycle found");
         }
+
+
+//        DiGraphCycle cycle_detector = new DiGraphCycle(digraph);
+//        if (cycle_detector.hasCycle()) {
+//            throw new IllegalArgumentException("Cycle found");
+//        }
         return digraph;
     }
 
@@ -236,12 +243,14 @@ public class WordNet {
             int inx = Integer.parseInt(matcher.group(1));
             String token = matcher.group(2);
             String description = matcher.group(3);
-            symTable.put(token, new Node(inx, description));
-            assert count == inx;
+
+            String [] tokens = token.split(" ");
+            for (String t: tokens) symTable.put(t, new Node(inx, description));
+            //assert count == inx; no longer consistent
             count++;
         }
         System.out.println("Read " + count + " vertex, Max Node number=" + symTable.getNumNodes());
-        assert symTable.getNumNodes() == count;
+        //assert symTable.getNumNodes() == count;
         fileIn.close();
         return symTable;
     }
@@ -256,48 +265,47 @@ public class WordNet {
 
     // returns all WordNet nouns
     public Iterable<String> nouns() {
-        return null;
+        return this.symbolTables.map.keySet();
     }
 
     // is the word a WordNet noun?
     public boolean isNoun(String word) {
+//        Iterable<Node> symNums = this.symbolTables.get(word);
+//        Set<Integer> nounSet = this.getNounSynset();
+//
+//        for(Node node: symNums){
+//            Stack<Integer> nounStackTrace = new Stack<>();
+//            nounStackTrace.push(node.num);
+//            boolean isNoun = dfs_check_ancestor(this.digraph, node.num, nounSet, nounStackTrace);
+//            if(isNoun){
+//                printStackTrace(nounStackTrace);
+//                return true;
+//            }
+//        }
 
-        Iterable<Node> symNums = this.symbolTables.get(word);
-        Set<Integer> nounSet = this.getNounSynset();
-        
-        for(Node node: symNums){
-            Stack<Integer> nounStackTrace = new Stack<>();
-            nounStackTrace.push(node.num);
-            boolean isNoun = this.dfs_check_ancestor(node.num, nounSet, nounStackTrace);
-            if(isNoun){
-                printStackTrace(nounStackTrace);
-                return true;
-            }
-        }
-
-        return false;
+        return this.symbolTables.get(word) != null;
     }
 
-    private void printStackTrace(Stack<Integer> stack){
+    private static void printStackTrace(Stack<Integer> stack){
         while(!stack.isEmpty()){
             System.out.println(stack.pop());
         }
     }
 
-    private boolean dfs_check_ancestor(int v, Set<Integer> ancestors, Stack<Integer> path){
-
-        for (int ancestor:this.digraph.adj(v)){
+    private static boolean dfs_check_ancestor(Digraph digraph,int v, Set<Integer> ancestors, Stack<Integer> path){
+        boolean found = false;
+        for (int ancestor:digraph.adj(v)){
             if (ancestors.contains(ancestor)){
                 path.push(ancestor);
                 return true;
             }else{
-                boolean found = dfs_check_ancestor(ancestor, ancestors, path);
+                found = dfs_check_ancestor(digraph, ancestor, ancestors, path);
                 if (found){
                     path.push(ancestor);
                 }
             }
         }
-        return false;
+        return found;
     }
 
     // distance between nounA and nounB (defined below)
@@ -314,7 +322,7 @@ public class WordNet {
     // do unit testing of this class
     public static void main(String[] args) {
         testCycleGraph();
-
+        testDiGraph();
         //var symboltables = testReadSymbSet(args[0]);
         //var Digraph = testCreateDigraph(symboltables, args[1]);
 
@@ -322,12 +330,41 @@ public class WordNet {
 
     }
 
+    private static void testDiGraph(){
+        String inputFile = "data/wordnet/digraph25.txt";
+
+        In fileIn = new In(inputFile);
+        if (!fileIn.exists()) throw new IllegalArgumentException();
+        int count = 0;
+        int vertex = fileIn.readInt();
+        int edge = fileIn.readInt();
+        assert vertex == 25;
+        assert edge == 24;
+        fileIn.readLine();
+        Digraph digraph = new Digraph(vertex);
+        for (int i=0;i<edge;i++){
+            int v = fileIn.readInt();
+            int w = fileIn.readInt();
+            digraph.addEdge(v, w);
+        }
+
+        Set<Integer> numSet = new HashSet<>();
+        numSet.add(1);
+        Stack<Integer> path = new Stack<>();
+        assert WordNet.dfs_check_ancestor(digraph, 21, numSet, path);
+        WordNet.printStackTrace(path);
+        assert !WordNet.dfs_check_ancestor(digraph, 18, numSet, path);
+
+    }
+
     private static WordNet testNoun(String synsets, String hypernyms){
         WordNet wordNet= new WordNet(synsets, hypernyms);
 
-        assert wordNet.isNoun("apple");
+        assert wordNet.isNoun("gerund");
+        assert wordNet.isNoun("anamorphosis");
 
-        assert  !wordNet.isNoun("running");
+        assert  wordNet.isNoun("running");
+        assert  !wordNet.isNoun("sdafads");
 
         return wordNet;
     }
