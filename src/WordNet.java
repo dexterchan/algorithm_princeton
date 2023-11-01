@@ -270,19 +270,6 @@ public class WordNet {
 
     // is the word a WordNet noun?
     public boolean isNoun(String word) {
-//        Iterable<Node> symNums = this.symbolTables.get(word);
-//        Set<Integer> nounSet = this.getNounSynset();
-//
-//        for(Node node: symNums){
-//            Stack<Integer> nounStackTrace = new Stack<>();
-//            nounStackTrace.push(node.num);
-//            boolean isNoun = dfs_check_ancestor(this.digraph, node.num, nounSet, nounStackTrace);
-//            if(isNoun){
-//                printStackTrace(nounStackTrace);
-//                return true;
-//            }
-//        }
-
         return this.symbolTables.get(word) != null;
     }
 
@@ -292,30 +279,21 @@ public class WordNet {
         }
     }
 
-    private static boolean dfs_check_ancestor(Digraph digraph,int v, Set<Integer> ancestors, Stack<Integer> path){
-        boolean found = false;
-        for (int ancestor:digraph.adj(v)){
-            if (ancestors.contains(ancestor)){
-                path.push(ancestor);
-                return true;
-            }else{
-                found = dfs_check_ancestor(digraph, ancestor, ancestors, path);
-                if (found){
-                    path.push(ancestor);
-                }
-            }
-        }
-        return found;
-    }
+
 
     // distance between nounA and nounB (defined below)
     public int distance(String nounA, String nounB) {
+        if (!this.isNoun(nounA)) throw new IllegalArgumentException();
+        if (!this.isNoun(nounB)) throw new IllegalArgumentException();
         return 0;
     }
 
     // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
     // in a shortest ancestral path (defined below)
     public String sap(String nounA, String nounB) {
+        if (!this.isNoun(nounA)) throw new IllegalArgumentException();
+        if (!this.isNoun(nounB)) throw new IllegalArgumentException();
+
         return null;
     }
 
@@ -351,9 +329,7 @@ public class WordNet {
         Set<Integer> numSet = new HashSet<>();
         numSet.add(1);
         Stack<Integer> path = new Stack<>();
-        assert WordNet.dfs_check_ancestor(digraph, 21, numSet, path);
-        WordNet.printStackTrace(path);
-        assert !WordNet.dfs_check_ancestor(digraph, 18, numSet, path);
+
 
     }
 
