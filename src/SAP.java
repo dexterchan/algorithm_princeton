@@ -47,24 +47,26 @@ public class SAP {
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
         if (G == null) throw new IllegalArgumentException();
-        this.G = G;
+        this.G = new Digraph(G);
     }
 
     // length of shortest ancestral path between v and w; -1 if no such path
     public int length(int v, int w) {
-        int[] visitedVertex = new int[this.G.V()];
-        Arrays.fill(visitedVertex, NOT_FOUND);
-        int ancestor = SAP.bfs(G, v, w, visitedVertex);
-        if (ancestor == NOT_FOUND) return NOT_FOUND;
+        List<Integer> v_s = new LinkedList<>();
+        List<Integer> w_s = new LinkedList<>();
+        v_s.add(v);
+        w_s.add(w);
 
-        return visitedVertex[ancestor];
+        return this.length(v_s, w_s);
     }
 
     // a common ancestor of v and w that participates in a shortest ancestral path; -1 if no such path
     public int ancestor(int v, int w) {
-        int[] visitedVertex = new int[this.G.V()];
-        Arrays.fill(visitedVertex, NOT_FOUND);
-        return SAP.bfs(G, v, w, visitedVertex);
+        List<Integer> v_s = new LinkedList<>();
+        List<Integer> w_s = new LinkedList<>();
+        v_s.add(v);
+        w_s.add(w);
+        return this.ancestor(v_s, w_s);
     }
 
     // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
@@ -90,31 +92,31 @@ public class SAP {
         return SAP.bfs(G, v, w, visitedVertexLeft, visitedVertexRight);
     }
 
-    private static int bfs(Digraph G, int v, int w, int[] visitedVertex) {
-        LinkedQueue<Node> queue = new LinkedQueue<Node>();
-        if (visitedVertex.length != G.V())
-            throw new IllegalArgumentException("Visited Vertex size and Graph vertex size not consistent");
-
-        Arrays.fill(visitedVertex, NOT_FOUND);
-
-        queue.enqueue(new Node(0, v));
-        queue.enqueue(new Node(0, w));
-
-        while (!queue.isEmpty()) {
-            Node node = queue.dequeue();
-            int vertex = node.vertex;
-            if (visitedVertex[vertex] != NOT_FOUND) {
-                visitedVertex[vertex] += node.distance;
-                return vertex;
-            } else {
-                visitedVertex[vertex] = node.distance;
-                for (Node nextNode : node.moveNext(G)) {
-                    queue.enqueue(nextNode);
-                }
-            }
-        }
-        return NOT_FOUND;
-    }
+//    private static int bfs(Digraph G, int v, int w, int[] visitedVertex) {
+//        LinkedQueue<Node> queue = new LinkedQueue<Node>();
+//        if (visitedVertex.length != G.V())
+//            throw new IllegalArgumentException("Visited Vertex size and Graph vertex size not consistent");
+//
+//        Arrays.fill(visitedVertex, NOT_FOUND);
+//
+//        queue.enqueue(new Node(0, v));
+//        queue.enqueue(new Node(0, w));
+//
+//        while (!queue.isEmpty()) {
+//            Node node = queue.dequeue();
+//            int vertex = node.vertex;
+//            if (visitedVertex[vertex] != NOT_FOUND) {
+//                visitedVertex[vertex] += node.distance;
+//                return vertex;
+//            } else {
+//                visitedVertex[vertex] = node.distance;
+//                for (Node nextNode : node.moveNext(G)) {
+//                    queue.enqueue(nextNode);
+//                }
+//            }
+//        }
+//        return NOT_FOUND;
+//    }
 
     private static int bfs(Digraph G, Iterable<Integer> v, Iterable<Integer> w, int[] visitedVertexLeft, int[] visitedVertexRight) {
         LinkedQueue<Node> queueLeft = new LinkedQueue<>();
@@ -165,11 +167,48 @@ public class SAP {
 
     // do unit testing of this class
     public static void main(String[] args) {
+        testDiGraph();
         testMultiSAPAncestor(args[0]);
 
         testSmallSAPAncestor();
 
         testSAPAncestor(args[0]);
+    }
+
+    private static void testDiGraph(){
+        In fileIn = new In("data/wordnet/digraph3.txt");
+        if (!fileIn.exists()) throw new IllegalArgumentException();
+        Digraph G = new Digraph(fileIn);
+        SAP sap = new SAP(G);
+
+        int ancestor, length;
+        List<Integer> v, w;
+        v = new LinkedList<>();
+        v.add(10);
+        w = new LinkedList<>();
+        w.add(7);
+        ancestor = sap.ancestor(v, w);
+        length = sap.length(v, w);
+        System.out.println(ancestor);
+        System.out.println(length);
+        assert length == 3;
+
+        v = new LinkedList<>();
+        v.add(7);
+        w = new LinkedList<>();
+        w.add(11);
+        ancestor = sap.ancestor(v, w);
+        length = sap.length(v, w);
+        System.out.println(ancestor);
+        System.out.println(length);
+        assert length == 3;
+
+//        ancestor = sap.ancestor(10, 7);
+//        length = sap.length(10, 7);
+//        //assert ancestor == 3;
+//        System.out.println(ancestor);
+//        System.out.println(length);
+//        assert length == 3;
     }
 
     private static void testMultiSAPAncestor(String filename) {
