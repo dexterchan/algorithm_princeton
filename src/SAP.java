@@ -141,7 +141,10 @@ public class SAP {
                         ancestor = lVertex;
                     }
                 } else {
-                    for (Node nextNode : left.moveNext(G)) queueLeft.enqueue(nextNode);
+                    for (Node nextNode : left.moveNext(G)){
+                        if (visitedVertexLeft[nextNode.vertex]==NOT_FOUND)
+                            queueLeft.enqueue(nextNode);
+                    }
                 }
             }
 
@@ -157,7 +160,10 @@ public class SAP {
                         ancestor = rVertex;
                     }
                 } else {
-                    for (Node nextNode : right.moveNext(G)) queueRight.enqueue(nextNode);
+                    for (Node nextNode : right.moveNext(G)){
+                        if (visitedVertexRight[nextNode.vertex]==NOT_FOUND)
+                            queueRight.enqueue(nextNode);
+                    }
                 }
             }
         }
