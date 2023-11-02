@@ -69,12 +69,25 @@ public class SAP {
 
     // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
-        return 0;
+        int[] visitedVertexLeft = new int[this.G.V()];
+        Arrays.fill(visitedVertexLeft, NOT_FOUND);
+        int[] visitedVertexRight = new int[this.G.V()];
+        Arrays.fill(visitedVertexRight, NOT_FOUND);
+
+        int ancestor = SAP.bfs(G, v, w, visitedVertexLeft, visitedVertexRight);
+        if (ancestor == NOT_FOUND) return NOT_FOUND;
+
+        return visitedVertexLeft[ancestor] + visitedVertexRight[ancestor];
     }
 
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
-        return 0;
+        int[] visitedVertexLeft = new int[this.G.V()];
+        Arrays.fill(visitedVertexLeft, NOT_FOUND);
+        int[] visitedVertexRight = new int[this.G.V()];
+        Arrays.fill(visitedVertexRight, NOT_FOUND);
+
+        return SAP.bfs(G, v, w, visitedVertexLeft, visitedVertexRight);
     }
 
     private static int bfs(Digraph G, int v, int w, int[] visitedVertex) {
@@ -92,10 +105,10 @@ public class SAP {
             int vertex = node.vertex;
             if (visitedVertex[vertex] != NOT_FOUND) {
                 visitedVertex[vertex] += node.distance;
-                return  vertex;
-            }else{
+                return vertex;
+            } else {
                 visitedVertex[vertex] = node.distance;
-                for(Node nextNode: node.moveNext(G)){
+                for (Node nextNode : node.moveNext(G)) {
                     queue.enqueue(nextNode);
                 }
             }
@@ -103,32 +116,167 @@ public class SAP {
         return NOT_FOUND;
     }
 
+    private static int bfs(Digraph G, Iterable<Integer> v, Iterable<Integer> w, int[] visitedVertexLeft, int[] visitedVertexRight) {
+        LinkedQueue<Node> queueLeft = new LinkedQueue<>();
+        LinkedQueue<Node> queueRight = new LinkedQueue<>();
+
+        for (int item : v) queueLeft.enqueue(new Node(0, item));
+        for (int item : w) queueRight.enqueue(new Node(0, item));
+
+        int shortestLength = Integer.MAX_VALUE;
+        int ancestor = NOT_FOUND;
+
+        while (!queueLeft.isEmpty() || !queueRight.isEmpty()) {
+            if (!queueLeft.isEmpty()) {
+                Node left = queueLeft.dequeue();
+                int lVertex = left.vertex;
+                if (visitedVertexLeft[lVertex] == NOT_FOUND) visitedVertexLeft[lVertex] = left.distance;
+                visitedVertexLeft[lVertex] = Math.min(left.distance, visitedVertexLeft[lVertex]);
+                if (visitedVertexRight[lVertex] != NOT_FOUND) {
+                    int newLength = visitedVertexLeft[lVertex] + visitedVertexRight[lVertex];
+                    if (shortestLength > newLength) {
+                        shortestLength = newLength;
+                        ancestor = lVertex;
+                    }
+                } else {
+                    for (Node nextNode : left.moveNext(G)) queueLeft.enqueue(nextNode);
+                }
+            }
+
+            if (!queueRight.isEmpty()) {
+                Node right = queueRight.dequeue();
+                int rVertex = right.vertex;
+                if (visitedVertexRight[rVertex] == NOT_FOUND) visitedVertexRight[rVertex] = right.distance;
+                visitedVertexRight[rVertex] = Math.min(right.distance, visitedVertexRight[rVertex]);
+                if (visitedVertexLeft[rVertex] != NOT_FOUND) {
+                    int newLength = visitedVertexLeft[rVertex] + visitedVertexRight[rVertex];
+                    if (shortestLength > newLength) {
+                        shortestLength = newLength;
+                        ancestor = rVertex;
+                    }
+                } else {
+                    for (Node nextNode : right.moveNext(G)) queueRight.enqueue(nextNode);
+                }
+            }
+        }
+        return ancestor;
+    }
+
+
     // do unit testing of this class
     public static void main(String[] args) {
+        testMultiSAPAncestor(args[0]);
 
+        testSmallSAPAncestor();
 
-        In fileIn = new In(args[0]);
+        testSAPAncestor(args[0]);
+    }
+
+    private static void testMultiSAPAncestor(String filename) {
+        In fileIn = new In(filename);
         if (!fileIn.exists()) throw new IllegalArgumentException();
         Digraph G = new Digraph(fileIn);
         SAP sap = new SAP(G);
-        testSAPAncestor(sap);
-    }
 
-    private static void testSAPAncestor(SAP sap) {
-        //int length = sap.length(v, w);
         int ancestor, length;
-        ancestor= sap.ancestor(13, 16);
-        assert ancestor==3;
-
-        ancestor= sap.ancestor(13, 17);
-        assert ancestor==0;
-
-        ancestor= sap.ancestor(17, 17);
-        assert ancestor==17;
-
-        length = sap.length(13,16);
+        List<Integer> v = new LinkedList<>();
+        v.add(13);
+        v.add(23);
+        v.add(24);
+        List<Integer> w = new LinkedList<>();
+        w.add(6);
+        w.add(16);
+        w.add(17);
+        ancestor = sap.ancestor(v, w);
+        length = sap.length(v, w);
+        assert ancestor == 3;
         assert length == 4;
 
+        v = new LinkedList<>();
+        v.add(13);
+        v.add(23);
+        v.add(24);
+        v.add(1);
+        w = new LinkedList<>();
+        w.add(6);
+        w.add(16);
+        w.add(17);
+        ancestor = sap.ancestor(v, w);
+        length = sap.length(v, w);
+        assert ancestor == 0;
+        assert length == 3;
 
     }
+
+    private static void testSAPAncestor(String filename) {
+        In fileIn = new In(filename);
+        if (!fileIn.exists()) throw new IllegalArgumentException();
+        Digraph G = new Digraph(fileIn);
+        SAP sap = new SAP(G);
+
+        //int length = sap.length(v, w);
+        int ancestor, length;
+        ancestor = sap.ancestor(13, 16);
+        length = sap.length(13, 16);
+        assert ancestor == 3;
+        assert length == 4;
+
+        ancestor = sap.ancestor(13, 17);
+        length = sap.length(13, 17);
+        assert ancestor == 0;
+        assert length == 8;
+
+        ancestor = sap.ancestor(17, 17);
+        length = sap.length(17, 17);
+        assert ancestor == 17;
+        assert length == 0;
+
+        ancestor = sap.ancestor(17, 17);
+        length = sap.length(17, 17);
+        assert ancestor == 17;
+        assert length == 0;
+
+        ancestor = sap.ancestor(13, 22);
+        length = sap.length(13, 22);
+        assert ancestor == 3;
+        assert length == 5;
+
+
+        //Add a node 16->3
+        sap.G.addEdge(16, 3);
+        ancestor = sap.ancestor(13, 22);
+        length = sap.length(13, 22);
+        assert ancestor == 3;
+        assert length == 4;
+
+    }
+
+    private static void testSmallSAPAncestor() {
+        In fileIn = new In("data/wordnet/digraph1.txt");
+        if (!fileIn.exists()) throw new IllegalArgumentException();
+        Digraph G = new Digraph(fileIn);
+        SAP sap = new SAP(G);
+
+        int ancestor, length;
+        ancestor = sap.ancestor(1, 6);
+        length = sap.length(1, 6);
+        assert ancestor == -1;
+        assert length == -1;
+
+        ancestor = sap.ancestor(3, 11);
+        length = sap.length(3, 11);
+        assert ancestor == 1;
+        assert length == 4;
+
+        ancestor = sap.ancestor(9, 12);
+        length = sap.length(9, 12);
+        assert ancestor == 5;
+        assert length == 3;
+
+        ancestor = sap.ancestor(7, 2);
+        length = sap.length(7, 2);
+        assert ancestor == 0;
+        assert length == 4;
+    }
+
 }
