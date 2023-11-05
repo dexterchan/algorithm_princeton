@@ -1,184 +1,133 @@
+import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.LinkedQueue;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
+import java.util.Set;
 
 public class SAP {
+    private Digraph graph;
+    private final int INVALID = -1;
 
-    private static final class Node {
-        int distance;
-        int vertex;
-
-        Node(int d, int v) {
-            distance = d;
-            vertex = v;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof Node)) {
-                return false;
-            }
-            Node node = (Node) obj;
-            return this.vertex == node.vertex;
-        }
-
-        @Override
-        public int hashCode() {
-            return 17 * ((Integer) vertex).hashCode();
-        }
-
-        Iterable<Node> moveNext(Digraph G) {
-            List<Node> nextNodes = new LinkedList<>();
-            for (int nextV : G.adj(this.vertex)) {
-                nextNodes.add(new Node(this.distance + 1, nextV));
-            }
-            return nextNodes;
-        }
-    }
-
-    private final static int NOT_FOUND = -1;
-    private Digraph G;
-
-    // constructor takes a digraph (not necessarily a DAG)
-    public SAP(Digraph G) {
-        if (G == null) throw new IllegalArgumentException();
-        this.G = new Digraph(G);
+    public SAP(Digraph g) {
+        this.graph = new Digraph(g);
     }
 
     // length of shortest ancestral path between v and w; -1 if no such path
     public int length(int v, int w) {
-        List<Integer> v_s = new LinkedList<>();
-        List<Integer> w_s = new LinkedList<>();
-        v_s.add(v);
-        w_s.add(w);
+        this.checkInput(v);
+        this.checkInput(w);
 
-        return this.length(v_s, w_s);
+        BfsTransverse bfs = new BfsTransverse(
+                this.graph,
+                this.getIterable(v),
+                this.getIterable(w)
+        );
+        return bfs.getLength();
     }
 
     // a common ancestor of v and w that participates in a shortest ancestral path; -1 if no such path
     public int ancestor(int v, int w) {
-        List<Integer> v_s = new LinkedList<>();
-        List<Integer> w_s = new LinkedList<>();
-        v_s.add(v);
-        w_s.add(w);
-        return this.ancestor(v_s, w_s);
+        this.checkInput(v);
+        this.checkInput(w);
+
+        BfsTransverse bfs = new BfsTransverse(
+                this.graph,
+                this.getIterable(v),
+                this.getIterable(w)
+        );
+
+        return bfs.getAncestor();
     }
 
     // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
-        int[] visitedVertexLeft = new int[this.G.V()];
-        Arrays.fill(visitedVertexLeft, NOT_FOUND);
-        int[] visitedVertexRight = new int[this.G.V()];
-        Arrays.fill(visitedVertexRight, NOT_FOUND);
+        if (!checkInputs(v)) return -1;
+        if (!checkInputs(w)) return -1;
 
-        int ancestor = SAP.bfs(G, v, w, visitedVertexLeft, visitedVertexRight);
-        if (ancestor == NOT_FOUND) return NOT_FOUND;
-
-        return visitedVertexLeft[ancestor] + visitedVertexRight[ancestor];
+        BfsTransverse bfs = new BfsTransverse(this.graph, v, w);
+        return bfs.getLength();
     }
 
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
-        int[] visitedVertexLeft = new int[this.G.V()];
-        Arrays.fill(visitedVertexLeft, NOT_FOUND);
-        int[] visitedVertexRight = new int[this.G.V()];
-        Arrays.fill(visitedVertexRight, NOT_FOUND);
+        if (!checkInputs(v)) return -1;
+        if (!checkInputs(w)) return -1;
 
-        return SAP.bfs(G, v, w, visitedVertexLeft, visitedVertexRight);
+        BfsTransverse bfs = new BfsTransverse(this.graph, v, w);
+        return bfs.getAncestor();
     }
 
-//    private static int bfs(Digraph G, int v, int w, int[] visitedVertex) {
-//        LinkedQueue<Node> queue = new LinkedQueue<Node>();
-//        if (visitedVertex.length != G.V())
-//            throw new IllegalArgumentException("Visited Vertex size and Graph vertex size not consistent");
-//
-//        Arrays.fill(visitedVertex, NOT_FOUND);
-//
-//        queue.enqueue(new Node(0, v));
-//        queue.enqueue(new Node(0, w));
-//
-//        while (!queue.isEmpty()) {
-//            Node node = queue.dequeue();
-//            int vertex = node.vertex;
-//            if (visitedVertex[vertex] != NOT_FOUND) {
-//                visitedVertex[vertex] += node.distance;
-//                return vertex;
-//            } else {
-//                visitedVertex[vertex] = node.distance;
-//                for (Node nextNode : node.moveNext(G)) {
-//                    queue.enqueue(nextNode);
-//                }
-//            }
-//        }
-//        return NOT_FOUND;
-//    }
 
-    private static int bfs(Digraph G, Iterable<Integer> v, Iterable<Integer> w, int[] visitedVertexLeft, int[] visitedVertexRight) {
-        LinkedQueue<Node> queueLeft = new LinkedQueue<>();
-        LinkedQueue<Node> queueRight = new LinkedQueue<>();
 
-        for (int item : v) queueLeft.enqueue(new Node(0, item));
-        for (int item : w) queueRight.enqueue(new Node(0, item));
-
-        int shortestLength = Integer.MAX_VALUE;
-        int ancestor = NOT_FOUND;
-
-        while (!queueLeft.isEmpty() || !queueRight.isEmpty()) {
-            if (!queueLeft.isEmpty()) {
-                Node left = queueLeft.dequeue();
-                int lVertex = left.vertex;
-                if (visitedVertexLeft[lVertex] == NOT_FOUND) visitedVertexLeft[lVertex] = left.distance;
-                visitedVertexLeft[lVertex] = Math.min(left.distance, visitedVertexLeft[lVertex]);
-                if (visitedVertexRight[lVertex] != NOT_FOUND) {
-                    int newLength = visitedVertexLeft[lVertex] + visitedVertexRight[lVertex];
-                    if (shortestLength > newLength) {
-                        shortestLength = newLength;
-                        ancestor = lVertex;
-                    }
-                } else {
-                    for (Node nextNode : left.moveNext(G)){
-                        if (visitedVertexLeft[nextNode.vertex]==NOT_FOUND)
-                            queueLeft.enqueue(nextNode);
-                    }
-                }
-            }
-
-            if (!queueRight.isEmpty()) {
-                Node right = queueRight.dequeue();
-                int rVertex = right.vertex;
-                if (visitedVertexRight[rVertex] == NOT_FOUND) visitedVertexRight[rVertex] = right.distance;
-                visitedVertexRight[rVertex] = Math.min(right.distance, visitedVertexRight[rVertex]);
-                if (visitedVertexLeft[rVertex] != NOT_FOUND) {
-                    int newLength = visitedVertexLeft[rVertex] + visitedVertexRight[rVertex];
-                    if (shortestLength > newLength) {
-                        shortestLength = newLength;
-                        ancestor = rVertex;
-                    }
-                } else {
-                    for (Node nextNode : right.moveNext(G)){
-                        if (visitedVertexRight[nextNode.vertex]==NOT_FOUND)
-                            queueRight.enqueue(nextNode);
-                    }
-                }
-            }
+    private void checkInput(int v) {
+        if (v < 0 || v >= graph.V() ) {
+            throw new IllegalArgumentException();
         }
-        return ancestor;
     }
 
+    private boolean checkInputs(Iterable<Integer> v){
+        int count = 0;
+        if (v == null) throw new IllegalArgumentException();
+        for(Integer i: v){
+            if (i == null) throw new IllegalArgumentException();
+            this.checkInput(i);
+            count++;
+        }
+        if (count == 0 ){
+            return false;
+        }
+        return true;
+    }
 
-    // do unit testing of this class
+    private Iterable<Integer> getIterable(int single) {
+        List<Integer> itr = new LinkedList<>();
+        itr.add(single);
+        return itr;
+    }
+
     public static void main(String[] args) {
+        testStrangeInput();
+
         testDiGraph();
+
         testMultiSAPAncestor(args[0]);
 
         testSmallSAPAncestor();
 
         testSAPAncestor(args[0]);
+    }
+
+    private static void testStrangeInput(){
+        int ancestor, length;
+        List<Integer> v, w;
+        v = new LinkedList<>();
+        w = new LinkedList<>();
+        In fileIn = new In("data/wordnet/digraph1.txt");
+        if (!fileIn.exists()) throw new IllegalArgumentException();
+        Digraph G = new Digraph(fileIn);
+        SAP sap = new SAP(G);
+
+        ancestor = sap.ancestor(v, w);
+        length = sap.length(v, w);
+
+        v = new LinkedList<>();
+        w = new LinkedList<>();
+        v.add(0);
+        v.add(3);
+        v.add(null);
+        v.add(8);
+        v.add(9);
+        w.add(5);
+        w.add(12);
+        try {
+            ancestor = sap.ancestor(v, w);
+            length = sap.length(v, w);
+        }catch (IllegalArgumentException ie){}
+
+
     }
 
     private static void testDiGraph(){
@@ -288,7 +237,7 @@ public class SAP {
 
 
         //Add a node 16->3
-        sap.G.addEdge(16, 3);
+        sap.graph.addEdge(16, 3);
         ancestor = sap.ancestor(13, 22);
         length = sap.length(13, 22);
         assert ancestor == 3;
@@ -322,6 +271,52 @@ public class SAP {
         length = sap.length(7, 2);
         assert ancestor == 0;
         assert length == 4;
+    }
+
+}
+
+class BfsTransverse {
+    private final int numVertexes;
+    private final BreadthFirstDirectedPaths v, w;
+
+    private static final int INVALID = -1;
+    private int ancestor = INVALID;
+    private int minDist = INVALID;
+
+    BfsTransverse(final Digraph g, final Iterable<Integer> vs, final Iterable<Integer> ws) {
+        numVertexes = g.V();
+        v = new BreadthFirstDirectedPaths(g, vs);
+        w = new BreadthFirstDirectedPaths(g, ws);
+        this.getAncest();
+    }
+
+    private void getAncest() {
+        //brutal method to explore all potential ancestors
+        for (int i = 0; i < numVertexes; i++) {
+            if (hasIntersection(i)) {
+                if (minDist == INVALID || minDist > this.getDist(i)) {
+                    this.minDist = this.getDist(i);
+                    this.ancestor = i;
+                }
+            }
+        }
+    }
+
+    public int getDist(final int t) {
+        return this.v.distTo(t) + this.w.distTo(t);
+    }
+
+    private boolean hasIntersection(int p) {
+        return v.hasPathTo(p) && w.hasPathTo(p);
+    }
+
+    public int getAncestor() {
+        return this.ancestor;
+    }
+
+
+    public int getLength() {
+        return this.minDist;
     }
 
 }

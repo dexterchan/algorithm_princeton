@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.Set;
 import java.util.Iterator;
+
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -109,10 +110,29 @@ public class WordNet {
 
     private static class SymbolTable {
         TreeMap<String, List<Node>> map = new TreeMap<>();
+        TreeMap<Integer, String> v_map = new TreeMap<>();
         private int max_node_num = 0;
+
+        public SymbolTable(){}
+        public SymbolTable (SymbolTable symbolTable){
+            SymbolTable newTable = new SymbolTable();
+            newTable.max_node_num = this.max_node_num;
+            for (Integer key: this.v_map.keySet()){
+                newTable.v_map.put(key, this.v_map.get(key));
+            }
+            for (String key: this.map.keySet()){
+                List<Node> newValues = new LinkedList<>();
+                this.map.get(key).forEach(
+                        node -> newValues.add(new Node(node))
+                );
+                newTable.map.put(key, newValues);
+            }
+
+        }
 
         public Iterable<Node> put(String key, Node value) {
             List<Node> values = null;
+
             if (!this.map.containsKey(key)) {
                 values = new LinkedList<>();
                 this.map.put(key, values);
@@ -124,8 +144,17 @@ public class WordNet {
             return values;
         }
 
+        public String put(int key, String raw_input){
+            this.v_map.put(key, raw_input);
+            return raw_input;
+        }
+
         public Iterable<Node> get(String key) {
             return this.map.get(key);
+        }
+
+        public String get(int vertex){
+            return this.v_map.get(vertex);
         }
 
         public int size() {
@@ -146,11 +175,19 @@ public class WordNet {
             this.num = num;
             this.description = description;
         }
+        Node(Node node){
+            this.num = node.num;
+            this.description = node.description;
+        }
     }
 
     private Digraph digraph = null;
 
     private SymbolTable symbolTables = null;
+
+    private SAP sap = null;
+
+//    public WordNet(){}
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
@@ -160,9 +197,15 @@ public class WordNet {
 
         this.symbolTables = WordNet.readSynsetsFile(synsets);
         this.digraph = WordNet.createDiGraph(this.symbolTables, hypernyms);
+        this.sap = new SAP(this.digraph);
         //this.readHyperNyms(hypernyms);
 
     }
+
+//    public WordNet(WordNet wordNet){
+//        this.symbolTables = new SymbolTable(wordNet.symbolTables);
+//        this.digraph = new Digraph(wordNet.digraph);
+//    }
 
     private static Digraph createDiGraph(SymbolTable st, String hypernyms) {
         int num_vertex = st.getNumNodes();
@@ -244,12 +287,14 @@ public class WordNet {
             String token = matcher.group(2);
             String description = matcher.group(3);
 
+            symTable.put(inx, token);
+
             String [] tokens = token.split(" ");
             for (String t: tokens) symTable.put(t, new Node(inx, description));
             //assert count == inx; no longer consistent
             count++;
         }
-        System.out.println("Read " + count + " vertex, Max Node number=" + symTable.getNumNodes());
+        //System.out.println("Read " + count + " vertex, Max Node number=" + symTable.getNumNodes());
         //assert symTable.getNumNodes() == count;
         fileIn.close();
         return symTable;
@@ -270,6 +315,7 @@ public class WordNet {
 
     // is the word a WordNet noun?
     public boolean isNoun(String word) {
+        if(word == null) throw new IllegalArgumentException();
         return this.symbolTables.get(word) != null;
     }
 
@@ -285,7 +331,10 @@ public class WordNet {
     public int distance(String nounA, String nounB) {
         if (!this.isNoun(nounA)) throw new IllegalArgumentException();
         if (!this.isNoun(nounB)) throw new IllegalArgumentException();
-        return 0;
+        Iterable<Integer> vertexAs = this.getVertexs(nounA);
+        Iterable<Integer> vertexBs = this.getVertexs(nounB);
+
+        return sap.length(vertexAs, vertexBs);
     }
 
     // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
@@ -293,13 +342,29 @@ public class WordNet {
     public String sap(String nounA, String nounB) {
         if (!this.isNoun(nounA)) throw new IllegalArgumentException();
         if (!this.isNoun(nounB)) throw new IllegalArgumentException();
+        Iterable<Integer> vertexAs = this.getVertexs(nounA);
+        Iterable<Integer> vertexBs = this.getVertexs(nounB);
+        int inx = sap.ancestor(vertexAs, vertexBs);
 
-        return null;
+        if (inx == INVALID_STATE){
+            throw new IllegalArgumentException();
+        }
+
+        return this.symbolTables.get(inx);
+    }
+
+    private Iterable<Integer> getVertexs(String noun){
+        if (!this.isNoun(noun)) throw new IllegalArgumentException();
+        List<Integer> vertexs = new LinkedList<>();
+        this.symbolTables.get(noun).forEach(
+                n->vertexs.add(n.num)
+        );
+        return vertexs;
     }
 
     // do unit testing of this class
     public static void main(String[] args) {
-        testCycleGraph();
+        //testCycleGraph();
         testDiGraph();
         //var symboltables = testReadSymbSet(args[0]);
         //var Digraph = testCreateDigraph(symboltables, args[1]);
@@ -307,6 +372,8 @@ public class WordNet {
         testNoun(args[0], args[1]);
 
     }
+
+
 
     private static void testDiGraph(){
         String inputFile = "data/wordnet/digraph25.txt";
@@ -341,6 +408,13 @@ public class WordNet {
 
         assert  wordNet.isNoun("running");
         assert  !wordNet.isNoun("sdafads");
+
+        int dist = wordNet.distance("apple", "orange");
+        assert dist != INVALID_STATE;
+        System.out.println(dist);
+        String ancestor = wordNet.sap("apple", "orange");
+        assert ancestor!=null;
+
 
         return wordNet;
     }
