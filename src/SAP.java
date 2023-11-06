@@ -280,8 +280,7 @@ public class SAP {
 }
 
 class BfsDirectedPath {
-    private Digraph g;
-    private List<Integer> vertexGrp;
+
     private final static int NOT_FOUND = -1;
 
     //Cached result
@@ -317,17 +316,12 @@ class BfsDirectedPath {
     }
 
     BfsDirectedPath(final Digraph g, Iterable<Integer> vs) {
-        this.g = new Digraph(g);
-        this.vertexGrp = new LinkedList<>();
-        validateVertexes(vs);
-        vs.forEach(
-                item -> this.vertexGrp.add(item)
-        );
-        this.visited = new boolean[this.g.V()];
+        this.visited = new boolean[g.V()];
         Arrays.fill(this.visited, false);
-        this.edgeTo = new Node[this.g.V()];
+        this.edgeTo = new Node[g.V()];
         Arrays.fill(this.edgeTo, null);
-        bfs(this.g);
+        validateVertexes(vs);
+        bfs(g, vs);
     }
 
     private boolean validateVertexes(Iterable<Integer> vs){
@@ -339,22 +333,22 @@ class BfsDirectedPath {
     }
     private boolean validateVertex(Integer v){
         if (v==null) throw new IllegalArgumentException();
-        if (v<0 || v>=this.g.V()){
+        if (v<0 || v>=this.visited.length){
             throw new IllegalArgumentException();
         }
         return true;
     }
 
-    private void bfs(Digraph digraph ){
+    private void bfs(Digraph digraph, Iterable<Integer> vs){
         Queue<Node> queue = new LinkedList<>();
-        for (int i : this.vertexGrp) queue.add(new Node(i, null));
+        for (int i : vs) queue.add(new Node(i, null));
 
         while(!queue.isEmpty()){
             Node node = queue.remove();
 
             int v = node.v;
             if (!visited[v]){
-                for (int w: this.g.adj(v)){
+                for (int w: digraph.adj(v)){
                     if(visited[w] && this.edgeTo[w].equals(node)) continue;
                     queue.add(new Node(w, node));
                 }
@@ -377,8 +371,8 @@ class BfsDirectedPath {
         return this.visited[v];
     }
 
-    private boolean bfsSingle(int source, int destination, Stack<Integer> paths) {
-        boolean[] visitedVertex = new boolean[g.V()];
+    private boolean bfsSingle(Digraph g, int source, int destination, Stack<Integer> paths) {
+        boolean[] visitedVertex = new boolean[this.visited.length];
         Arrays.fill(visitedVertex, false);
 
         Queue<Node> queue = new LinkedList<>();
