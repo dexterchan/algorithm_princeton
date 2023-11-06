@@ -1,9 +1,9 @@
 import edu.princeton.cs.algs4.Digraph;
-//import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
+import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.Queue;
 
 
-import java.util.Queue;
 import java.util.Arrays;
 import java.util.Stack;
 import java.util.LinkedList;
@@ -280,24 +280,29 @@ public class SAP {
 }
 
 class BfsDirectedPath {
-    private Digraph g;
-    private List<Integer> vertexGrp;
+
+    //private List<Integer> vertexGrp;
     private final static int NOT_FOUND = -1;
 
     //Cached result
     private boolean visited[];
-    private Node edgeTo[];
+    //private Node edgeTo[];
+    private int edgeTo[];
+    private int distance[];
 
     private static final class Node {
-        int distance;
-        int v;
-        Node prev;
+        final int distance;
+        final int v;
+        final Node prev;
 
         Node(int v, Node prevNode) {
             this.v = v;
             this.prev = prevNode;
-            this.distance = 0;
-            if (this.prev != null) this.distance = prevNode.distance + 1;
+            if (this.prev != null) {
+                this.distance = prevNode.distance + 1;
+            }else{
+                this.distance = 0;
+            }
         }
 
         @Override
@@ -317,17 +322,19 @@ class BfsDirectedPath {
     }
 
     BfsDirectedPath(final Digraph g, Iterable<Integer> vs) {
-        this.g = new Digraph(g);
-        this.vertexGrp = new LinkedList<>();
-        validateVertexes(vs);
-        vs.forEach(
-                item -> this.vertexGrp.add(item)
-        );
-        this.visited = new boolean[this.g.V()];
+        //this.g = new Digraph(g);
+
+
+
+        this.visited = new boolean[g.V()];
         Arrays.fill(this.visited, false);
-        this.edgeTo = new Node[this.g.V()];
-        Arrays.fill(this.edgeTo, null);
-        bfs(this.g);
+        //this.edgeTo = new Node[this.g.V()];
+        this.edgeTo = new int[g.V()];
+        Arrays.fill(this.edgeTo, NOT_FOUND);
+        this.distance = new int[g.V()];
+        Arrays.fill(distance, 0);
+        validateVertexes(vs);
+        bfs(g, vs);
     }
 
     private boolean validateVertexes(Iterable<Integer> vs){
@@ -339,37 +346,46 @@ class BfsDirectedPath {
     }
     private boolean validateVertex(Integer v){
         if (v==null) throw new IllegalArgumentException();
-        if (v<0 || v>=this.g.V()){
+        if (v<0 || v>=this.visited.length){
             throw new IllegalArgumentException();
         }
         return true;
     }
 
-    private void bfs(Digraph digraph ){
-        Queue<Node> queue = new LinkedList<>();
-        for (int i : this.vertexGrp) queue.add(new Node(i, null));
+    private void bfs(Digraph digraph , Iterable<Integer> vs){
+        Queue<Integer> queue = new Queue<>();
+        //for (int i : this.vertexGrp) queue.add(new Node(i, null));
+        for (int i : vs) {
+            queue.enqueue(i);
+            this.visited[i] = true;
+            this.distance[i] = 0;
+        }
 
         while(!queue.isEmpty()){
-            Node node = queue.remove();
+            //Node node = queue.remove();
+            //int v = node.v;
+            int v = queue.dequeue();
 
-            int v = node.v;
-            if (!visited[v]){
-                for (int w: this.g.adj(v)){
-                    if(visited[w] && this.edgeTo[w].equals(node)) continue;
-                    queue.add(new Node(w, node));
+            for (int w: digraph.adj(v)){
+                if(!visited[w]) {
+                    this.visited[w] = true;
+                    this.edgeTo[w] = v;
+                    this.distance[w] = this.distance[v] + 1;
+                    queue.enqueue(w);
                 }
             }
-            this.visited[v] = true;
-            if(this.edgeTo[v] == null) this.edgeTo[v] = node;
-            if(this.edgeTo[v].distance > node.distance) this.edgeTo[v] = node;
+
+//            if(this.edgeTo[v] == null) this.edgeTo[v] = node;
+//            if(this.edgeTo[v].distance > node.distance) this.edgeTo[v] = node;
         }
 
     }
 
     int distTo(int v) {
         validateVertex(v);
-        Node node = this.edgeTo[v];
-        return node.distance;
+        //Node node = this.edgeTo[v];
+        //return node.distance;
+        return this.distance[v];
     }
 
     boolean hasPathTo(int v) {
@@ -377,50 +393,50 @@ class BfsDirectedPath {
         return this.visited[v];
     }
 
-    private boolean bfsSingle(int source, int destination, Stack<Integer> paths) {
-        boolean[] visitedVertex = new boolean[g.V()];
-        Arrays.fill(visitedVertex, false);
-
-        Queue<Node> queue = new LinkedList<>();
-        queue.add(new Node(source, null));
-
-        while (!queue.isEmpty()) {
-            Node thisNode = queue.remove();
-            int v = thisNode.v;
-            visitedVertex[v] = true;
-
-            if (v == destination) {
-                //unstack the edgeTo
-
-
-                Node prevNode = thisNode.prev;
-                paths.push(v);
-
-                //Avoid cyclic graph running endlessly
-                Set<Node> visitedNode = new HashSet<>();
-                //visitedNode.add(prevNode);
-
-                while (prevNode != null) {
-                    if(visitedNode.contains(prevNode)){
-                        System.out.println("Endless loop spotted"+prevNode.v);
-                        return false;
-                    }
-                    visitedNode.add(prevNode);
-                    //System.out.println(prevNode.toString());
-                    paths.push(prevNode.v);
-                    prevNode = prevNode.prev;
-                }
-                assert thisNode.distance == paths.size() - 1;
-
-                return true;
-            } else {
-                for (int w : g.adj(thisNode.v)) {
-                    if (!visitedVertex[w]) queue.add(new Node(w, thisNode));
-                }
-            }
-        }
-        return false;
-    }
+//    private boolean bfsSingle(int source, int destination, Stack<Integer> paths) {
+//        boolean[] visitedVertex = new boolean[g.V()];
+//        Arrays.fill(visitedVertex, false);
+//
+//        Queue<Node> queue = new LinkedList<>();
+//        queue.add(new Node(source, null));
+//
+//        while (!queue.isEmpty()) {
+//            Node thisNode = queue.remove();
+//            int v = thisNode.v;
+//            visitedVertex[v] = true;
+//
+//            if (v == destination) {
+//                //unstack the edgeTo
+//
+//
+//                Node prevNode = thisNode.prev;
+//                paths.push(v);
+//
+//                //Avoid cyclic graph running endlessly
+//                Set<Node> visitedNode = new HashSet<>();
+//                //visitedNode.add(prevNode);
+//
+//                while (prevNode != null) {
+//                    if(visitedNode.contains(prevNode)){
+//                        System.out.println("Endless loop spotted"+prevNode.v);
+//                        return false;
+//                    }
+//                    visitedNode.add(prevNode);
+//                    //System.out.println(prevNode.toString());
+//                    paths.push(prevNode.v);
+//                    prevNode = prevNode.prev;
+//                }
+//                assert thisNode.distance == paths.size() - 1;
+//
+//                return true;
+//            } else {
+//                for (int w : g.adj(thisNode.v)) {
+//                    if (!visitedVertex[w]) queue.add(new Node(w, thisNode));
+//                }
+//            }
+//        }
+//        return false;
+//    }
 
 
 }
