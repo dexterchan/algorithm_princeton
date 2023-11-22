@@ -1,3 +1,5 @@
+import edu.princeton.cs.algs4.In;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,7 +12,7 @@ public class BoggleSolver {
         private final Pattern pattern = Pattern.compile("^[A-Z]+$");
 
         private final static class Node {
-            private final Object value;
+            private Object value;
             private final Node[] next;
 
             private Node(Object value) {
@@ -18,8 +20,16 @@ public class BoggleSolver {
                 this.next = new Node[NUM_CHR];
             }
 
+            private Node(){
+                this(null);
+            }
+
             public Object getValue() {
                 return this.value;
+            }
+
+            public void setValue(Object value){
+                this.value = value;
             }
 
             public boolean isNUll() {
@@ -27,7 +37,7 @@ public class BoggleSolver {
             }
 
             public Node getNode(int i) {
-                if (isValidNodeBoundary(i)) throw new IllegalArgumentException();
+                if (!isValidNodeBoundary(i)) throw new IllegalArgumentException("INvalid boundary "+i);
                 return this.next[i];
             }
 
@@ -37,7 +47,8 @@ public class BoggleSolver {
             }
 
             private static boolean isValidNodeBoundary(int i) {
-                if (i < 0 || i >= NUM_CHR) return false;
+                if (i < 0 || i >= NUM_CHR)
+                    return false;
                 return true;
             }
 
@@ -84,25 +95,27 @@ public class BoggleSolver {
 
         }
 
-        private static <Value> Node recursivePutTries(Node node, String key, Value value, int remain) {
-            if (remain == 0) return null;
+        private static void assignNewChildNode(Node node, String key, int at){
+            int nextNodeIndex = getNextNodeIndex(key, at);
+            node.setNode(new Node(), nextNodeIndex);
+        }
+        private static <Value> void recursivePutTries(Node node, String key, Value value, int remain) {
+            if (remain == 0) {
+                node.setValue(value);
+                return;
+            };
 
             int at = key.length() - remain;
-            int nodeLength = getNodeLength(key, at);
-            int nextNodeIndex = getNextNodeIndex(key, at);
-
-            int new_remain = remain - nodeLength;
-            Node nextNode = node.next[nextNodeIndex] ;
-            if (nextNode == null){
-                nextNode = ( new_remain==0) ? new Node(value) : new Node(null);
-                node.setNode(nextNode, nextNodeIndex);
+            int nodeIndex = getNextNodeIndex(key, at);
+            Node childNode = node.getNode(nodeIndex);
+            if (childNode == null){
+                assignNewChildNode(node, key, at);
+                childNode = node.getNode(nodeIndex);
             }
+            int new_remain = remain - getNodeLength(key, at);
 
-            recursivePutTries(nextNode, key, value, new_remain);
+            recursivePutTries(childNode, key, value, new_remain);
 
-
-
-            return nextNode;
         }
 
         private static int getNodeLength(String key, int at) {
@@ -128,10 +141,7 @@ public class BoggleSolver {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-
-
-            return sb.toString();
+            return this.node.toString();
         }
     }
 
@@ -152,9 +162,34 @@ public class BoggleSolver {
     }
 
     public static void main(String[] args) {
+        testTries(args[0]);
+        testBoardRead();
+    }
+
+    static void testTries(String fileName){
         Tries<String> tries = new Tries<>();
         tries.put("ABC", "ABC_value");
-        tries.put("ABD", "ABD_value");
-        System.out.println(tries.node);
+        tries.put("BBA", "BBA_value");
+        tries.put("BBD", "BBD_value");
+        tries.put("BBD", "BBD2_value");
+        System.out.println(tries);
+
+        Tries<String> testTries = new Tries<>();
+        In fileStream = new In(fileName);
+        String[] dictionary = fileStream.readAllStrings();
+        for (String s: dictionary){
+            testTries.put(s, s);
+        }
+    }
+
+    static void testBoardRead(){
+        BoggleBoard board = new BoggleBoard("data/boggle/board4x4.txt");
+        System.out.println(board);
+
+        board = new BoggleBoard("data/boggle/board-16q.txt");
+        System.out.println(board);
+
+        board = new BoggleBoard("data/boggle/board-aqua.txt");
+        System.out.println(board);
     }
 }
