@@ -109,7 +109,7 @@ public class BoggleBoard {
 
     private void isValidDimension(int m, int n) {
         if (m < 0 || m >= this.row) throw new IllegalArgumentException();
-        if (n < 0) throw new IllegalArgumentException();
+        if (n < 0 || n>=this.col) throw new IllegalArgumentException();
     }
 }
 
