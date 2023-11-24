@@ -4,6 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Set;
+import java.util.HashSet;
 
 //https://coursera.cs.princeton.edu/algs4/assignments/boggle/specification.php
 public class BoggleSolver {
@@ -203,14 +205,13 @@ public class BoggleSolver {
 
     // Returns the set of all valid words in the given Boggle board, as an Iterable.
     public Iterable<String> getAllValidWords(BoggleBoard board) {
-
-        return null;
+        return this.travseBoard(board);
     }
 
 
-    private List<String> travseBoard(BoggleBoard board) {
+    private Iterable<String> travseBoard(BoggleBoard board) {
         boolean[][] visited = new boolean[board.rows()][board.cols()];
-        List<String> finalResults = new LinkedList<>();
+        Set<String> finalResults = new HashSet<>();
         for (int i = 0; i < board.rows(); i++) {
             for (int j = 0; j < board.cols(); j++) {
                 char c = board.getLetter(i, j);
@@ -233,20 +234,22 @@ public class BoggleSolver {
         return visited;
     }
 
-    private List<String> searchWords(BoggleBoard board, Tries.Node node, int row, int col, boolean[][] visited, List<String> results) {
+    private Set<String> searchWords(BoggleBoard board, Tries.Node node, int row, int col, boolean[][] visited, Set<String> results) {
         if (visited[row][col]) {
             return results;
         }
         visited[row][col] = true;
-        if (!node.isNUll()) {
-            results.add((String) node.getValue());
-        }
 
         char c = board.getLetter(row, col);
         if (!node.hasChild(c)) {
+            visited[row][col] = false;
             return results;
         }
         Tries.Node nextNode = node.getNode(Tries.getNextNodeIndex(c));
+
+        if (!nextNode.isNUll()) {
+            results.add((String) nextNode.getValue());
+        }
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
@@ -339,13 +342,25 @@ public class BoggleSolver {
         score = solver.matchString("queen");
         assert score == "queen".length() - 1;
 
-        BoggleBoard board = new BoggleBoard("data/boggle/board-points5.txt");
-        String[] dictionary2 = {"TNG", "APPLE", "ORANGE"};
+        BoggleBoard board = null;
+        Iterable<String> matchedStrings = null;
+        board = new BoggleBoard("data/boggle/board-points5.txt");
+        String[] dictionary2 = {"TNG","SNG", "APPLE", "ORANGE"};
         solver = new BoggleSolver(dictionary2);
-        List<String> matchedStrings = solver.travseBoard(board);
+        matchedStrings = solver.travseBoard(board);
         for (String s : matchedStrings) {
             System.out.println(s);
         }
+
+        char[][] data = {{'A','B'},{'C','D'}};
+        board = new BoggleBoard(data);
+        String[] dictionary3 = {"AB", "APPLE", "ORANGE"};
+        solver = new BoggleSolver(dictionary3);
+        matchedStrings = solver.travseBoard(board);
+        for (String s : matchedStrings) {
+            System.out.println(s);
+        }
+
 
     }
 
