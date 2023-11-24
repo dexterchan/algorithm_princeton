@@ -178,11 +178,12 @@ public class BoggleSolver {
             return true;
         }
 
-        public Object getCurrentValue(){
-            if(this.currentPosition == null) return null;
+        public Object getCurrentValue() {
+            if (this.currentPosition == null) return null;
 
             return this.currentPosition.getValue();
         }
+
         public String toString() {
             return this.node.toString();
         }
@@ -222,9 +223,10 @@ public class BoggleSolver {
         }
         return finalResults;
     }
-    private static boolean[][] resetVisitedRecords(boolean[][] visited, int rows, int cols){
-        for (int i=0;i<rows;i++){
-            for (int j=0;j<cols;j++){
+
+    private static boolean[][] resetVisitedRecords(boolean[][] visited, int rows, int cols) {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
                 visited[i][j] = false;
             }
         }
@@ -232,24 +234,25 @@ public class BoggleSolver {
     }
 
     private List<String> searchWords(BoggleBoard board, Tries.Node node, int row, int col, boolean[][] visited, List<String> results) {
-        if (visited[row][col]){
+        if (visited[row][col]) {
             return results;
         }
         visited[row][col] = true;
-        if (!node.isNUll()){
-            results.add((String)node.getValue());
+        if (!node.isNUll()) {
+            results.add((String) node.getValue());
         }
 
         char c = board.getLetter(row, col);
-        if (!node.hasChild(c)){
+        if (!node.hasChild(c)) {
             return results;
         }
         Tries.Node nextNode = node.getNode(Tries.getNextNodeIndex(c));
 
-        for(int i=-1;i<1;i++){
-            for (int j=-1;j<1;j++){
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
                 int n_i = row + i;
                 int n_j = col + j;
+                if (!isValidBoardDimension(board, n_i, n_j)) continue;
                 if (visited[n_i][n_j]) continue;
                 results = searchWords(board, nextNode, n_i, n_j, visited, results);
             }
@@ -258,10 +261,10 @@ public class BoggleSolver {
     }
 
 
-
-    private static void isValidBoardDimension(BoggleBoard board, int m, int n) {
-        if (m < 0 || m >= board.rows()) throw new IllegalArgumentException();
-        if (n < 0 || n >= board.cols()) throw new IllegalArgumentException();
+    private static boolean isValidBoardDimension(BoggleBoard board, int m, int n) {
+        if (m < 0 || m >= board.rows()) return false;
+        if (n < 0 || n >= board.cols()) return false;
+        return true;
     }
 
     // Returns the score of the given word if it is in the dictionary, zero otherwise.
@@ -303,7 +306,7 @@ public class BoggleSolver {
             matchNumChar++;
         }
         if (_tries.getCurrentValue() == null || !_tries.getCurrentValue().equals(upperWord)) {
-            System.out.println("Not matching although matched" + upperWord);
+            //System.out.println("Not matching although matched " + upperWord);
             return 0;
         }
 
@@ -313,8 +316,8 @@ public class BoggleSolver {
 
     public static void main(String[] args) {
         testBoggleSolver();
-        testTries("data/boggle/dictionary-algs4.txt");
-        testBoardRead();
+//        testTries("data/boggle/dictionary-algs4.txt");
+//        testBoardRead();
     }
 
     private static void testBoggleSolver() {
@@ -325,6 +328,8 @@ public class BoggleSolver {
         System.out.println(solver._tries);
         score = solver.matchString("quarrel");
         assert score == "quarrel".length() - 1;
+        score = solver.scoreOf("quarrel");
+        assert score == 3;
 
         score = solver.matchString("APPLE");
         assert score == 0;
@@ -332,10 +337,15 @@ public class BoggleSolver {
         assert score == "APPLEPIE".length();
 
         score = solver.matchString("queen");
-        assert score == "queen".length() -1;
+        assert score == "queen".length() - 1;
 
         BoggleBoard board = new BoggleBoard("data/boggle/board-points5.txt");
-
+        String[] dictionary2 = {"TNG", "APPLE", "ORANGE"};
+        solver = new BoggleSolver(dictionary2);
+        List<String> matchedStrings = solver.travseBoard(board);
+        for (String s : matchedStrings) {
+            System.out.println(s);
+        }
 
     }
 
