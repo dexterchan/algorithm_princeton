@@ -2,9 +2,7 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Stopwatch;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -157,7 +155,12 @@ public class BoggleSolver {
 
         private static int getNodeLength(String key, int at) {
             if (!isValidateKeyAt(key, at)) throw new IllegalArgumentException();
-            if (key.charAt(at) == 'Q') return 2;
+            if (key.charAt(at) != 'Q') return 1;
+
+            int nextCharAt = at + 1;
+            if (!isValidateKeyAt(key, nextCharAt)) return 1;
+            if (key.charAt(nextCharAt) == 'U') return 2;
+
             return 1;
         }
 
@@ -173,12 +176,7 @@ public class BoggleSolver {
 
         private static boolean isValidateKeyAt(String key, int at) {
             if (key == null || key.isEmpty()) return false;
-            char c = key.charAt(at);
-            if (c != 'Q') return true;
-
-            //last character is Q
-            if (key.length() - 1 == at) throw new IllegalArgumentException("Q is last character");
-            if (key.charAt(at + 1) != 'U') throw new IllegalArgumentException("Q should follow U");
+            if (at < 0 || at >= key.length()) return false;
             return true;
         }
 
@@ -209,7 +207,7 @@ public class BoggleSolver {
     public Iterable<String> getAllValidWords(BoggleBoard board) {
         Set<String> raw_results = this.travseBoard(board);
 
-        return raw_results.stream().filter(word->calculateValidStringScore(word)>0).collect(Collectors.toList());
+        return raw_results.stream().filter(word -> calculateValidStringScore(word) > 0).collect(Collectors.toList());
 
     }
 
@@ -285,7 +283,7 @@ public class BoggleSolver {
         return calculateValidStringScore(word);
     }
 
-    private int calculateValidStringScore(String word){
+    private int calculateValidStringScore(String word) {
         int score = 0;
         int numfOfChars = word.length();
         if (numfOfChars >= 3 && numfOfChars <= 4) {
@@ -331,12 +329,46 @@ public class BoggleSolver {
 
 
     public static void main(String[] args) {
+        testQfollowU();
         testBoggleSolver();
         testAccuracy();
 
         testPerformance("data/boggle/dictionary-algs4.txt", 100);
 //        testTries("data/boggle/dictionary-algs4.txt");
         testBoardRead();
+    }
+
+    private static void testQfollowU() {
+        String[] dictionary;
+        BoggleBoard board;
+        BoggleSolver solver;
+        Iterable<String> resultItr;
+        Set<String> resultSet;
+
+        //Test Tries : BUQSHA
+        Tries<String> tries = new Tries<>();
+        tries.put("ABC", "ABC_value");
+        tries.put("QUEEN", "QUEEN_value");
+        tries.put("BUQSHA", "BUQSHA_value");
+        tries.put("COREQ", "COREQ_value");
+        //System.out.println(tries);
+
+        String [] dictionary1 = {"ABC", "QUEEN", "BUQSHA", "COREQ", "QQQ"};
+        solver = new BoggleSolver(dictionary1);
+        System.out.println( solver.matchString("QQQ"));
+        assert solver.matchString("ABC") == 3;
+        assert solver.matchString("QUEEN") == 4;
+        //assert solver.matchString("BUQSHA") == 6;
+
+
+        board = new BoggleBoard("data/boggle/board4x4.txt");
+        In streamIn = new In("data/boggle/dictionary-yawl.txt");
+        dictionary = streamIn.readAllStrings();
+        solver = new BoggleSolver(dictionary);
+
+        resultSet = solver.travseBoard(board);
+        assert resultSet.contains("BUQSHA");
+
     }
 
     private static void testAccuracy() {
@@ -372,7 +404,7 @@ public class BoggleSolver {
 
         resultItr = solver.getAllValidWords(board);
         boolean foundSi = false;
-        for(String s: resultItr){
+        for (String s : resultItr) {
             if (s.equals("SI")) foundSi = true;
         }
         assert !foundSi;
