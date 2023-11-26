@@ -208,14 +208,9 @@ public class BoggleSolver {
     // Returns the set of all valid words in the given Boggle board, as an Iterable.
     public Iterable<String> getAllValidWords(BoggleBoard board) {
         Set<String> raw_results = this.travseBoard(board);
-        return raw_results.stream().filter(
-                new Predicate<String>() {
-                    @Override
-                    public boolean test(String word) {
-                        return calculateValidStringScore(word) > 0;
-                    }
-                }
-                ).collect(Collectors.toList());
+
+        return raw_results.stream().filter(word->calculateValidStringScore(word)>0).collect(Collectors.toList());
+
     }
 
 
@@ -336,9 +331,9 @@ public class BoggleSolver {
 
 
     public static void main(String[] args) {
-
-        testAccuracy();
         testBoggleSolver();
+        testAccuracy();
+
         testPerformance("data/boggle/dictionary-algs4.txt", 100);
 //        testTries("data/boggle/dictionary-algs4.txt");
         testBoardRead();
@@ -348,6 +343,7 @@ public class BoggleSolver {
         BoggleBoard board;
         BoggleSolver solver;
         Set resultSet;
+        Iterable<String> resultItr;
         String[] dictionary = {"USE", "ABC"};
 
         In streamIn = new In("data/boggle/dictionary-algs4.txt");
@@ -362,7 +358,6 @@ public class BoggleSolver {
         //assert solver.scoreOf("SI") != 0;
         resultSet = solver.travseBoard(board);
         assert resultSet.contains("USE");
-
         assert !resultSet.contains("ABC");
 
 
@@ -371,20 +366,16 @@ public class BoggleSolver {
         solver = new BoggleSolver(dictionary);
         assert solver.scoreOf("USE") != 0;
 
-        for (String s: dictionary){
-            if (s.equals("SI")){
-                System.out.println("Found SI");
-            }
-        }
-
         resultSet = solver.travseBoard(board);
-        //assert solver.scoreOf("SI") != 0;
         assert resultSet.contains("USE");
         assert resultSet.contains("SI");
-        Iterator<String> r = resultSet.iterator();
-        while (r.hasNext()) {
-            System.out.println(r.next());
+
+        resultItr = solver.getAllValidWords(board);
+        boolean foundSi = false;
+        for(String s: resultItr){
+            if (s.equals("SI")) foundSi = true;
         }
+        assert !foundSi;
 
         char[][] data2 = {{'Y', 'N', 'U'}, {'D', 'S', 'E'}};
         board = new BoggleBoard(data2);
@@ -426,7 +417,7 @@ public class BoggleSolver {
         score = solver.matchString("quarrel");
         assert score == "quarrel".length() - 1;
         score = solver.scoreOf("quarrel");
-        assert score == 3;
+        assert score == 5;
 
         score = solver.matchString("APPLE");
         assert score == 0;
@@ -435,6 +426,9 @@ public class BoggleSolver {
 
         score = solver.matchString("queen");
         assert score == "queen".length() - 1;
+        score = solver.scoreOf("queen");
+        assert score == 2;
+
 
         BoggleBoard board = null;
         Iterable<String> matchedStrings = null;
