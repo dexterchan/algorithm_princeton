@@ -65,7 +65,7 @@ public class BoggleBoard {
         this.col = a[0].length;
         this.board = new char[this.row][this.col];
         for (int i = 0; i < this.row; i++) {
-            for (int j = 0; j < this.row; j++) {
+            for (int j = 0; j < this.col; j++) {
                 this.board[i][j] = a[i][j];
             }
         }

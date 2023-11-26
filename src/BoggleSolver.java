@@ -1,18 +1,20 @@
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.Stopwatch;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.stream.Collectors;
 
 //https://coursera.cs.princeton.edu/algs4/assignments/boggle/specification.php
 public class BoggleSolver {
 
     private final Tries<String> _tries;
 
-    static class Tries<Value> {
+    private static class Tries<Value> {
         private static final int NUM_CHR = 26;
         private final Node node = new Node(null);
 
@@ -205,11 +207,19 @@ public class BoggleSolver {
 
     // Returns the set of all valid words in the given Boggle board, as an Iterable.
     public Iterable<String> getAllValidWords(BoggleBoard board) {
-        return this.travseBoard(board);
+        Set<String> raw_results = this.travseBoard(board);
+        return raw_results.stream().filter(
+                new Predicate<String>() {
+                    @Override
+                    public boolean test(String word) {
+                        return calculateValidStringScore(word) > 0;
+                    }
+                }
+                ).collect(Collectors.toList());
     }
 
 
-    private Iterable<String> travseBoard(BoggleBoard board) {
+    private Set<String> travseBoard(BoggleBoard board) {
         boolean[][] visited = new boolean[board.rows()][board.cols()];
         Set<String> finalResults = new HashSet<>();
         for (int i = 0; i < board.rows(); i++) {
@@ -260,6 +270,8 @@ public class BoggleSolver {
                 results = searchWords(board, nextNode, n_i, n_j, visited, results);
             }
         }
+        visited[row][col] = false;
+
         return results;
     }
 
@@ -274,14 +286,20 @@ public class BoggleSolver {
     // (You can assume the word contains only the uppercase letters A through Z.)
     public int scoreOf(String word) {
         int matchNumChar = this.matchString(word);
+        if (matchNumChar == 0) return 0;
+        return calculateValidStringScore(word);
+    }
+
+    private int calculateValidStringScore(String word){
         int score = 0;
-        if (matchNumChar >= 3 && matchNumChar <= 4) {
+        int numfOfChars = word.length();
+        if (numfOfChars >= 3 && numfOfChars <= 4) {
             return 1;
         }
-        if (matchNumChar >= 8) {
+        if (numfOfChars >= 8) {
             return 11;
         }
-        switch (matchNumChar) {
+        switch (numfOfChars) {
             case 5:
                 score = 2;
                 break;
@@ -318,9 +336,85 @@ public class BoggleSolver {
 
 
     public static void main(String[] args) {
+
+        testAccuracy();
         testBoggleSolver();
+        testPerformance("data/boggle/dictionary-algs4.txt", 100);
 //        testTries("data/boggle/dictionary-algs4.txt");
-//        testBoardRead();
+        testBoardRead();
+    }
+
+    private static void testAccuracy() {
+        BoggleBoard board;
+        BoggleSolver solver;
+        Set resultSet;
+        String[] dictionary = {"USE", "ABC"};
+
+        In streamIn = new In("data/boggle/dictionary-algs4.txt");
+        dictionary = streamIn.readAllStrings();
+
+
+        //char[][] data = {{'T', 'Y', 'N', 'U'}, {'E', 'D', 'S', 'E'}};
+        char[][] data = {{'N', 'U'}, {'S', 'E'}};
+        board = new BoggleBoard(data);
+        solver = new BoggleSolver(dictionary);
+        assert solver.scoreOf("USE") != 0;
+        //assert solver.scoreOf("SI") != 0;
+        resultSet = solver.travseBoard(board);
+        assert resultSet.contains("USE");
+
+        assert !resultSet.contains("ABC");
+
+
+        board = new BoggleBoard("data/boggle/board4x4.txt");
+
+        solver = new BoggleSolver(dictionary);
+        assert solver.scoreOf("USE") != 0;
+
+        for (String s: dictionary){
+            if (s.equals("SI")){
+                System.out.println("Found SI");
+            }
+        }
+
+        resultSet = solver.travseBoard(board);
+        //assert solver.scoreOf("SI") != 0;
+        assert resultSet.contains("USE");
+        assert resultSet.contains("SI");
+        Iterator<String> r = resultSet.iterator();
+        while (r.hasNext()) {
+            System.out.println(r.next());
+        }
+
+        char[][] data2 = {{'Y', 'N', 'U'}, {'D', 'S', 'E'}};
+        board = new BoggleBoard(data2);
+        solver = new BoggleSolver(dictionary);
+        resultSet = solver.travseBoard(board);
+        assert resultSet.contains("USE");
+
+    }
+
+    private static void testPerformance(String fileName, int dim) {
+        In fileStream = new In(fileName);
+        String[] dictionary = fileStream.readAllStrings();
+        int test_num = 10;
+        BoggleSolver solver = new BoggleSolver(dictionary);
+        Stopwatch stopwatch = new Stopwatch();
+        for (int i = 0; i < test_num; i++) {
+            BoggleBoard board = new BoggleBoard(dim, dim);
+            Iterable<String> results = solver.getAllValidWords(board);
+            //printResults(results);
+        }
+        double totalTime = stopwatch.elapsedTime();
+        System.out.println("Average calculation time:" + totalTime / test_num);
+
+    }
+
+    private static void printResults(Iterable<String> results) {
+        for (String s : results) {
+            System.out.print(s + ",");
+        }
+        System.out.println();
     }
 
     private static void testBoggleSolver() {
@@ -345,14 +439,14 @@ public class BoggleSolver {
         BoggleBoard board = null;
         Iterable<String> matchedStrings = null;
         board = new BoggleBoard("data/boggle/board-points5.txt");
-        String[] dictionary2 = {"TNG","SNG", "APPLE", "ORANGE"};
+        String[] dictionary2 = {"TNG", "SNG", "APPLE", "ORANGE"};
         solver = new BoggleSolver(dictionary2);
         matchedStrings = solver.travseBoard(board);
         for (String s : matchedStrings) {
             System.out.println(s);
         }
 
-        char[][] data = {{'A','B'},{'C','D'}};
+        char[][] data = {{'A', 'B'}, {'C', 'D'}};
         board = new BoggleBoard(data);
         String[] dictionary3 = {"AB", "APPLE", "ORANGE"};
         solver = new BoggleSolver(dictionary3);
@@ -383,13 +477,22 @@ public class BoggleSolver {
 
 
     private static void testBoardRead() {
-        BoggleBoard board = new BoggleBoard("data/boggle/board4x4.txt");
+        BoggleBoard board;
+//        char[][] data = {{'N', 'U'}, { 'S', 'E'}};
+//        board = new BoggleBoard(data);
+//        System.out.println(board);
+
+        char[][] data2 = {{'Y', 'N', 'U'}, {'D', 'S', 'E'}};
+        board = new BoggleBoard(data2);
         System.out.println(board);
 
-        board = new BoggleBoard("data/boggle/board-16q.txt");
-        System.out.println(board);
-
-        board = new BoggleBoard("data/boggle/board-aqua.txt");
-        System.out.println(board);
+//        board = new BoggleBoard("data/boggle/board4x4.txt");
+//        System.out.println(board);
+//
+//        board = new BoggleBoard("data/boggle/board-16q.txt");
+//        System.out.println(board);
+//
+//        board = new BoggleBoard("data/boggle/board-aqua.txt");
+//        System.out.println(board);
     }
 }
