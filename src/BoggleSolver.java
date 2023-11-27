@@ -333,7 +333,7 @@ public class BoggleSolver {
         testBoggleSolver();
         testAccuracy();
 
-        testPerformance("data/boggle/dictionary-algs4.txt", 100);
+        testPerformance("data/boggle/dictionary-algs4.txt", 10);
 //        testTries("data/boggle/dictionary-algs4.txt");
         testBoardRead();
     }
@@ -353,12 +353,20 @@ public class BoggleSolver {
         tries.put("COREQ", "COREQ_value");
         //System.out.println(tries);
 
-        String [] dictionary1 = {"ABC", "QUEEN", "BUQSHA", "COREQ", "QQQ"};
+        String[] dictionary1 = {"ABC", "QUEEN", "BUQSHA", "COREQ", "QQQ"};
         solver = new BoggleSolver(dictionary1);
-        System.out.println( solver.matchString("QQQ"));
+        System.out.println(solver.matchString("QQQ"));
         assert solver.matchString("ABC") == 3;
         assert solver.matchString("QUEEN") == 4;
         //assert solver.matchString("BUQSHA") == 6;
+        char[][] data = {{'Q','U','I','T'},
+                {'Q','E','C','X'},
+                {'Q','R','O','C'},
+                {'A','Q','U','A'}};
+        board = new BoggleBoard(data);
+        resultSet = solver.travseBoard(board);
+        assert resultSet.contains("COREQ");
+        assert resultSet.contains("QQQ");
 
 
         board = new BoggleBoard("data/boggle/board4x4.txt");
@@ -367,7 +375,12 @@ public class BoggleSolver {
         solver = new BoggleSolver(dictionary);
 
         resultSet = solver.travseBoard(board);
-        assert resultSet.contains("BUQSHA");
+        assert resultSet.contains("UNIT");
+
+
+//        for (String w: resultSet){
+//            System.out.println(w);
+//        }
 
     }
 
@@ -420,7 +433,7 @@ public class BoggleSolver {
     private static void testPerformance(String fileName, int dim) {
         In fileStream = new In(fileName);
         String[] dictionary = fileStream.readAllStrings();
-        int test_num = 10;
+        int test_num = 100;
         BoggleSolver solver = new BoggleSolver(dictionary);
         Stopwatch stopwatch = new Stopwatch();
         for (int i = 0; i < test_num; i++) {
