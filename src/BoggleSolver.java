@@ -147,10 +147,23 @@ public class BoggleSolver {
                 assignNewChildNode(node, key, at);
                 childNode = node.getNode(nodeIndex);
             }
-            int new_remain = remain - getNodeLength(key, at);
+            int newRemain = remain - getNodeLength(key, at);
 
-            recursivePutTries(childNode, key, value, new_remain);
+            if (!getValidQfollowedByU(key, at)) return;
 
+            recursivePutTries(childNode, key, value, newRemain);
+
+        }
+
+        private static boolean getValidQfollowedByU(String key, int at) {
+            if (!isValidateKeyAt(key, at)) throw new IllegalArgumentException();
+            if (key.charAt(at) != 'Q') return true;
+
+            int nextCharAt = at + 1;
+            if (!isValidateKeyAt(key, nextCharAt)) return false;
+            if (key.charAt(nextCharAt) != 'U') return false;
+
+            return true;
         }
 
         private static int getNodeLength(String key, int at) {
@@ -256,11 +269,11 @@ public class BoggleSolver {
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
-                int n_i = row + i;
-                int n_j = col + j;
-                if (!isValidBoardDimension(board, n_i, n_j)) continue;
-                if (visited[n_i][n_j]) continue;
-                results = searchWords(board, nextNode, n_i, n_j, visited, results);
+                int nI = row + i;
+                int nJ = col + j;
+                if (!isValidBoardDimension(board, nI, nJ)) continue;
+                if (visited[nI][nJ]) continue;
+                results = searchWords(board, nextNode, nI, nJ, visited, results);
             }
         }
         visited[row][col] = false;
@@ -304,6 +317,7 @@ public class BoggleSolver {
                 break;
             default:
                 score = 0;
+                break;
         }
         return score;
     }
@@ -329,13 +343,28 @@ public class BoggleSolver {
 
 
     public static void main(String[] args) {
+        testQfollowU2();
         testQfollowU();
         testBoggleSolver();
         testAccuracy();
 
         testPerformance("data/boggle/dictionary-algs4.txt", 10);
-//        testTries("data/boggle/dictionary-algs4.txt");
+        testTries("data/boggle/dictionary-algs4.txt");
         testBoardRead();
+    }
+
+    private static void testQfollowU2() {
+        BoggleBoard board;
+        String[] dictionary;
+        BoggleSolver solver;
+        Set<String> resultSet;
+        board = new BoggleBoard("data/boggle/board-qwerty.txt");
+        In streamIn = new In("data/boggle/dictionary-yawl.txt");
+        dictionary = streamIn.readAllStrings();
+        solver = new BoggleSolver(dictionary);
+
+        resultSet = solver.travseBoard(board);
+        assert !resultSet.contains("TRANQ");
     }
 
     private static void testQfollowU() {
@@ -345,13 +374,13 @@ public class BoggleSolver {
         Iterable<String> resultItr;
         Set<String> resultSet;
 
-        //Test Tries : BUQSHA
+        // Test Tries : BUQSHA
         Tries<String> tries = new Tries<>();
         tries.put("ABC", "ABC_value");
         tries.put("QUEEN", "QUEEN_value");
         tries.put("BUQSHA", "BUQSHA_value");
         tries.put("COREQ", "COREQ_value");
-        //System.out.println(tries);
+        // System.out.println(tries);
 
         String[] dictionary1 = {"ABC", "QUEEN", "BUQSHA", "COREQ", "QQQ"};
         solver = new BoggleSolver(dictionary1);
@@ -359,14 +388,14 @@ public class BoggleSolver {
         assert solver.matchString("ABC") == 3;
         assert solver.matchString("QUEEN") == 4;
         //assert solver.matchString("BUQSHA") == 6;
-        char[][] data = {{'Q','U','I','T'},
-                {'Q','E','C','X'},
-                {'Q','R','O','C'},
-                {'A','Q','U','A'}};
+        char[][] data = {{'Q', 'U', 'I', 'T'},
+                {'Q', 'E', 'C', 'X'},
+                {'Q', 'R', 'O', 'C'},
+                {'A', 'Q', 'U', 'A'}};
         board = new BoggleBoard(data);
         resultSet = solver.travseBoard(board);
-        assert resultSet.contains("COREQ");
-        assert resultSet.contains("QQQ");
+        assert !resultSet.contains("COREQ");
+        assert !resultSet.contains("QQQ");
 
 
         board = new BoggleBoard("data/boggle/board4x4.txt");
@@ -376,12 +405,6 @@ public class BoggleSolver {
 
         resultSet = solver.travseBoard(board);
         assert resultSet.contains("UNIT");
-
-
-//        for (String w: resultSet){
-//            System.out.println(w);
-//        }
-
     }
 
     private static void testAccuracy() {
@@ -395,12 +418,12 @@ public class BoggleSolver {
         dictionary = streamIn.readAllStrings();
 
 
-        //char[][] data = {{'T', 'Y', 'N', 'U'}, {'E', 'D', 'S', 'E'}};
+        // char[][] data = {{'T', 'Y', 'N', 'U'}, {'E', 'D', 'S', 'E'}};
         char[][] data = {{'N', 'U'}, {'S', 'E'}};
         board = new BoggleBoard(data);
         solver = new BoggleSolver(dictionary);
         assert solver.scoreOf("USE") != 0;
-        //assert solver.scoreOf("SI") != 0;
+        // assert solver.scoreOf("SI") != 0;
         resultSet = solver.travseBoard(board);
         assert resultSet.contains("USE");
         assert !resultSet.contains("ABC");
@@ -439,19 +462,19 @@ public class BoggleSolver {
         for (int i = 0; i < test_num; i++) {
             BoggleBoard board = new BoggleBoard(dim, dim);
             Iterable<String> results = solver.getAllValidWords(board);
-            //printResults(results);
+            assert results != null;
         }
         double totalTime = stopwatch.elapsedTime();
         System.out.println("Average calculation time:" + totalTime / test_num);
 
     }
 
-    private static void printResults(Iterable<String> results) {
-        for (String s : results) {
-            System.out.print(s + ",");
-        }
-        System.out.println();
-    }
+//    private static void printResults(Iterable<String> results) {
+//        for (String s : results) {
+//            System.out.print(s + ",");
+//        }
+//        System.out.println();
+//    }
 
     private static void testBoggleSolver() {
         String[] dictionary = {"APPLEPIE", "ORANGE", "BANANA", "UMBELLA", "quarrel", "queen"};
