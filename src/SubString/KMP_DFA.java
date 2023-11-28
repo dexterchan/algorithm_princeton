@@ -40,7 +40,12 @@ public class KMP_DFA {
 
     private static int getPatternIndex(String pattern, int i) {
         if (i < 0 || i >= pattern.length()) throw new IllegalArgumentException();
-        return pattern.charAt(i);
+        return getState(pattern.charAt(i));
+    }
+
+    private static final int getState(char c) {
+        if (c < 'A' || c > 'Z') throw new IllegalArgumentException();
+        return (int) c;
     }
 
     @Override
