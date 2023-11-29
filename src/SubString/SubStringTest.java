@@ -33,22 +33,34 @@ public class SubStringTest {
     }
 
     public static int boyleCountFromRight(String pat, String text) {
-        int i, j;
+        int i = 0, j;
         int N = text.length();
         int M = pat.length();
         Boyle_Heuristic heuristic = new Boyle_Heuristic(pat);
 
-//        int skip = 0;
-//        for (i = 0, j = 0; i < N && j < M; i+=skip) {
+        int skip = 0;
+        j = M-1;
+        for (i = 0; i < N && j>0 ; i += skip) {
+            skip = 0;
+            for (j = M - 1; j >= 0 && i + j >= 0 && i + j < N; j--) {
+                char c = text.charAt(i + j);
+                if (c != pat.charAt(j)){
+                    skip = Math.max(1, j-heuristic.skipCharacters(c));
+                    break;
+                }
+            }
+        }
+
+//        for (i = 0, j = 0; i < N && j < M; i += skip) {
 //            skip = 0;
 //            char c = text.charAt(i + j);
-//            if ( c == pat.charAt(j)) j++;
+//            if (c == pat.charAt(j)) j++;
 //            else {
-//                skip = Math.max(1, j- heuristic.skipCharacters(c);
+//                skip = Math.max(1, j - heuristic.skipCharacters(c);
 //                j = 0;
 //            }
 //        }
-        if (j == M) return i;
+        if (skip==0) return i;
         else return -1;
     }
 
@@ -78,12 +90,12 @@ public class SubStringTest {
         assert (kmpDfaSubstringSearch(pat, text)) == -1;
 
         pat = "ADABR";
+        System.out.println(boyleCountFromRight(pat, text));
         assert (boyleCountFromRight(pat, text)) == 4;
 
         pat = "BRAC";
-        System.out.println(boyleCountFromRight(pat,text));
+        System.out.println(boyleCountFromRight(pat, text));
         assert (boyleCountFromRight(pat, text)) == 7;
-
 
         pat = "AAAAA";
         assert (boyleCountFromRight(pat, text)) == -1;
