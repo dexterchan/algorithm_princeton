@@ -28,7 +28,7 @@ public class Boyle_Heuristic {
 
     public int skipCharacters(char c) {
         int state = getState(c);
-        return Math.max(1, this.heuristic[state]);
+        return  this.heuristic[state];
     }
 
     private static final int getState(char c) {
