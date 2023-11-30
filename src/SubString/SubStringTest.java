@@ -38,6 +38,8 @@ public class SubStringTest {
         int M = pat.length();
         Boyle_Heuristic heuristic = new Boyle_Heuristic(pat);
 
+        if(N<M) return -1;
+
         int skip = 0;
         j = M-1;
         for (i = 0; i < N && j>0 ; i += skip) {
@@ -51,15 +53,6 @@ public class SubStringTest {
             }
         }
 
-//        for (i = 0, j = 0; i < N && j < M; i += skip) {
-//            skip = 0;
-//            char c = text.charAt(i + j);
-//            if (c == pat.charAt(j)) j++;
-//            else {
-//                skip = Math.max(1, j - heuristic.skipCharacters(c);
-//                j = 0;
-//            }
-//        }
         if (skip==0) return i;
         else return -1;
     }
@@ -70,6 +63,9 @@ public class SubStringTest {
         RabinKarpHash hashCalc = new RabinKarpHash(pat, pat.length());
         long refHash = hashCalc.getPatternHash();
         long curHash = hashCalc.calculateHash(text);
+
+        if (refHash == curHash) return 0;
+
         final int M = hashCalc.getHashLength();
         for (int i = hashCalc.getHashLength(); i < N; i++) {
             curHash = hashCalc.updateHash(curHash, text.charAt(i - M), text.charAt(i));
@@ -89,6 +85,9 @@ public class SubStringTest {
         pat = "AAAAA";
         assert (kmpDfaSubstringSearch(pat, text)) == -1;
 
+        pat = "AA";
+        assert (boyleCountFromRight(pat, text)) == -1;
+
         pat = "ADABR";
         System.out.println(boyleCountFromRight(pat, text));
         assert (boyleCountFromRight(pat, text)) == 4;
@@ -97,8 +96,18 @@ public class SubStringTest {
         System.out.println(boyleCountFromRight(pat, text));
         assert (boyleCountFromRight(pat, text)) == 7;
 
-        pat = "AAAAA";
-        assert (boyleCountFromRight(pat, text)) == -1;
+        pat = "ABACADABRAC";
+        System.out.println(boyleCountFromRight(pat, text));
+        assert (boyleCountFromRight(pat, text)) == 0;
+
+        pat = "ABACADABRAC";
+        assert (rabinKarpSubStringSearch(pat, text) == 0);
+
+        pat = "ABACADABRA";
+        assert (rabinKarpSubStringSearch(pat, text) == 0);
+
+        pat = "BACADABRA";
+        assert (rabinKarpSubStringSearch(pat, text) == 1);
 
         pat = "BRAC";
         assert (rabinKarpSubStringSearch(pat, text) == 7);
@@ -108,6 +117,8 @@ public class SubStringTest {
 
         pat = "AAAA";
         assert (rabinKarpSubStringSearch(pat, text) == -1);
+
+
     }
 
 }
