@@ -93,13 +93,25 @@ class BinaryTries {
         Node currentNode = this.node;
         int totalLength = binaryDigits.length();
         for (int i = 0; i < totalLength; i++) {
-            int digit = (binaryDigits.charAt(i) - '0');
+            int digit = deriveDigit(binaryDigits, i);
 
-            if (currentNode.hasNode(digit) && currentNode.getNode(digit).hasValue()) duplicated = true;
-            if (isLastDigit(binaryDigits, i) && currentNode.hasNode(digit)) duplicated = true;
+            if (isTriesPathLastDigitAndIncludingThisDigit(currentNode, digit)) duplicated = true;
+            if (isLastDigit(binaryDigits, i) && isDigitIncludedInTries(currentNode, digit)) duplicated = true;
             currentNode = currentNode.insertNode(digit, i == totalLength - 1 ? binaryDigits : null);
         }
         return duplicated;
+    }
+
+    private int deriveDigit(String binaryDigit, int i){
+        return binaryDigit.charAt(i) - '0';
+    }
+
+    private boolean isTriesPathLastDigitAndIncludingThisDigit(Node node, int digit){
+        return node.hasNode(digit) && node.getNode(digit).hasValue();
+    }
+
+    private boolean isDigitIncludedInTries(Node node, int digit){
+        return node.hasNode(digit);
     }
 
     private boolean isLastDigit(String binaryDigits, int pos) {
@@ -130,6 +142,10 @@ public class Prefix_Binary {
         String[] prefixFree2 = {"0010", "1111", "01", "10"};
         foundPrefix = Prefix_Binary.detectPrefixInDigitStrings(prefixFree2);
         if (foundPrefix) throw new IllegalStateException();
+
+        String[] prefixFree3 = {"0010", "1111", "01", "10","00111"};
+        foundPrefix = Prefix_Binary.detectPrefixInDigitStrings(prefixFree3);
+        if (foundPrefix) throw new IllegalStateException();
     }
 
     private static void testPatternWithPrefix() {
@@ -139,6 +155,10 @@ public class Prefix_Binary {
 
         String[] prefixFree2 = {"0010", "10100", "01", "10"};
         foundPrefix = Prefix_Binary.detectPrefixInDigitStrings(prefixFree2);
+        assert foundPrefix;
+
+        String[] prefixFree3 = {"0010", "1111", "01", "10","00111", "0011"};
+        foundPrefix = Prefix_Binary.detectPrefixInDigitStrings(prefixFree3);
         assert foundPrefix;
     }
 }
