@@ -44,7 +44,7 @@ public class KMP_DFA {
     }
 
     private static final int getState(char c) {
-        if (c < 'A' || c > 'Z') throw new IllegalArgumentException();
+        if (c < 0 || c >= CHAR_SIZE) throw new IllegalArgumentException();
         return (int) c;
     }
 
