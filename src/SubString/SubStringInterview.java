@@ -45,7 +45,7 @@ public class SubStringInterview {
         }
         if (!lastSmoothTransition) return false;
         if (stage == 0) return false;
-        int startPos = strLength - stage ;
+        int startPos = strLength - stage;
 
         for (int i = 0; i < startPos; i++) {
             if (str1.charAt(i) != str2.charAt(stage + i)) {
@@ -61,20 +61,24 @@ public class SubStringInterview {
     }
 
     public static void main(String[] args) {
+        testCyclicRotationOfString();
+    }
+
+    public static void testCyclicRotationOfString() {
         boolean result = false;
         result = SubStringInterview.cyclicRotationOfString("winterbreak", "breakwintet");
-        System.out.println(result);
+        assert (result == false);
 
         result = SubStringInterview.cyclicRotationOfString("winterbreak", "breakwinter");
-        System.out.println(result);
+        assert (result);
 
         result = SubStringInterview.cyclicRotationOfString("winterbreak", "breabwinter");
-        System.out.println(result);
+        assert (result == false);
 
         result = SubStringInterview.cyclicRotationOfString("ADBADBA", "DBAADBA");
-        System.out.println(result);
+        assert (result);
 
         result = SubStringInterview.cyclicRotationOfString("ADBADBA", "DBAADBA");
-        System.out.println(result);
+        assert (result);
     }
 }
