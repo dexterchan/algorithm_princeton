@@ -1,5 +1,30 @@
 package SubString;
 
+
+class TandemRepeatFinder{
+    final KMP_DFA kmp_dfa;
+    int lastStart = 0, lastEnd = 0;
+    int recordLength = 0;
+    int stage = 0;
+    int lastStage = 0;
+    final int strLength;
+    final int END_STATE_MACHINE;
+
+    final String str;
+
+    TandemRepeatFinder(String str, String base){
+        this.str = str;
+        kmp_dfa = new KMP_DFA(base);
+        strLength = str.length();
+        END_STATE_MACHINE = base.length();
+    }
+
+    private void findTandem(){
+
+    }
+
+}
+
 public class SubStringInterview {
 
     /*
@@ -55,6 +80,93 @@ public class SubStringInterview {
 
         return true;
     }
+
+
+    /*
+        Tandem repeat. A tandem repeat of a base string b within a string
+        s is a substring of s consisting of at least one consecutive copy
+        of the base string b.
+        Given b and s, design an algorithm to find a tandem repeat of
+        b within s of maximum length.
+        Your algorithm should run in time proportional to
+        M+N, where M is length of b and N is the length s.
+
+        For example, if
+        s is "abcabcababcaba" and
+        b is "abcab", then "abcababcab" is the tandem substring of maximum length (2 copies).
+     */
+    /*
+        Answer:
+        setup KMP state machine from the base
+        Mode: searching mode
+        loop the state machine on the string for each character at i
+
+        when detect next state=1 at i, enter Run mode
+        start the counting of start=i,
+        check if there is smooth transition,
+
+        check exit criteria:
+        keep running
+        if smooth transition, continue until state=end of state machine
+        if prev state = end of state machine and check the next state =1
+        otherwise exit at i
+
+        if i-start > recordLength, register lastEnd=i, lastStart=start
+     */
+    public static String maxTandemRepeat(String str, String base) {
+        KMP_DFA kmp_dfa = new KMP_DFA(base);
+        int lastStart = 0, lastEnd = 0;
+        int recordLength = 0;
+        int stage = 0;
+        int lastStage = 0;
+        final int strLength = str.length();
+        final int END_STATE_MACHINE = base.length();
+        boolean searchMode = true;
+
+        int i;
+        for (i = 0; i < strLength; i++) {
+            char c = str.charAt(i);
+            int nextStage = kmp_dfa.getNexState(stage, c);
+
+        }
+//            if(searchMode){
+//                if(nextStage==1){
+//                    searchMode = false;
+//                    lastStart = i;
+//                }
+//            }else{
+//                if(nextStage==END_STATE_MACHINE){
+//                    if(i==strLength-1){
+//                        lastEnd = i;
+//                        if(lastEnd-lastStart>recordLength){
+//                            recordLength = lastEnd-lastStart;
+//                        }
+//                    }else{
+//                        if(kmp_dfa.getNexState(nextStage, str.charAt(i+1))==1){
+//                            lastEnd = i;
+//                            if(lastEnd-lastStart>recordLength){
+//                                recordLength = lastEnd-lastStart;
+//                            }
+//                        }else{
+//                            searchMode = true;
+//                            stage = 0;
+//                        }
+//                    }
+//                }else{
+//                    if(smoothTransition(stage, nextStage)){
+//                        stage = nextStage;
+//                    }else{
+//                        searchMode = true;
+//                        stage = 0;
+//                    }
+//                }
+//        }
+//    }
+
+
+        return null;
+    }
+
 
     private static boolean smoothTransition(int stage, int nextStage) {
         return nextStage == stage + 1;
