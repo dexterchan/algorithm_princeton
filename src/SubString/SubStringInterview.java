@@ -101,8 +101,7 @@ class TandemRepeatFinder {
             int state = getState(str.charAt(k));
             nextStage = this.dfa[state][stage];
             if (nextStage == this.END_STATE_MACHINE) {
-                int lastSegPos = getLastSegmentStart(k);
-                if (lastSegPos != lastEnd + 1) lastStart = lastSegPos;
+                if (!isContinuousSegment(k, lastEnd)) lastStart = getLastSegmentStart(k);
                 lastEnd = k;
 
                 int l = getSegmentLength(lastStart, lastEnd);
@@ -116,8 +115,12 @@ class TandemRepeatFinder {
 
         }
         //Adjust bestEnd
-
         return bestEnd - bestStart;
+    }
+
+    private boolean isContinuousSegment(int k, int lastEnd) {
+        int lastSegPos = getLastSegmentStart(k);
+        return lastSegPos == lastEnd + 1;
     }
 
     private int getLastSegmentStart(int k) {
@@ -228,6 +231,12 @@ public class SubStringInterview {
 
     public static void testTandem() {
         String resultStr;
+
+        resultStr = SubStringInterview.maxTandemRepeat("aaaaaaaaaaaaaaaadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaa", "aaaa");
+        System.out.println(resultStr);
+        assert resultStr != null;
+
+        assert resultStr.equals("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
         resultStr = SubStringInterview.maxTandemRepeat("abcababcababcabcababcaba", "abcab");
         assert resultStr != null;
