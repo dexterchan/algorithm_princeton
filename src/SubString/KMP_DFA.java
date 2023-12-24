@@ -63,6 +63,10 @@ public class KMP_DFA {
         return sb.toString();
     }
 
+    public int getMaxStages(){
+        return this.pattern.length();
+    }
+
     public static void main(String[] args) {
         KMP_DFA dfa = new KMP_DFA("ABABAC");
         System.out.println(dfa.toString());
