@@ -97,18 +97,20 @@ class TandemRepeatFinder {
         int stage;
 
 
-        for (stage = 0; k < strLength; k++, stage = nextStage ) {
+        for (stage = 0; k < strLength; k++, stage = nextStage) {
             int state = getState(str.charAt(k));
             nextStage = this.dfa[state][stage];
             if (nextStage == this.END_STATE_MACHINE) {
                 int lastSegPos = getLastSegmentStart(k);
                 if (lastSegPos != lastEnd + 1) lastStart = lastSegPos;
                 lastEnd = k;
-                System.out.println(lastStart + "," + lastEnd);
+
                 int l = getSegmentLength(lastStart, lastEnd);
+                System.out.println(lastStart + "," + lastEnd + ":" + l);
                 if (maxLen < l) {
                     bestStart = lastStart;
                     bestEnd = lastEnd;
+                    maxLen = l;
                 }
             }
 
@@ -226,6 +228,12 @@ public class SubStringInterview {
 
     public static void testTandem() {
         String resultStr;
+
+        resultStr = SubStringInterview.maxTandemRepeat("abcababcababcabcababcaba", "abcab");
+        assert resultStr != null;
+        System.out.println(resultStr);
+        assert resultStr.equals("abcababcababcab");
+
         resultStr = SubStringInterview.maxTandemRepeat("abcaccabaccaba", "abcab");
         assert resultStr == null;
 
@@ -250,10 +258,6 @@ public class SubStringInterview {
         assert resultStr == null;
 
 
-        resultStr = SubStringInterview.maxTandemRepeat("abcababcababcabcababcaba", "abcab");
-        assert resultStr != null;
-        System.out.println(resultStr);
-        assert resultStr.equals("abcababcababcab");
     }
 
     public static void testCyclicRotationOfString() {
