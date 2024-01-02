@@ -12,9 +12,9 @@ public class RabinKarpHash {
 
     final long patternHash;
 
-    public RabinKarpHash(String pattern, int digitLength) {
+    public RabinKarpHash(String pattern) {
         this.pattern = pattern;
-        this.hashDigitLength = digitLength;
+        this.hashDigitLength = pattern.length();
 
         R_BASE_hashDigitLength_POWER = 1;
         for (int i = 0; i < hashDigitLength - 1; i++)

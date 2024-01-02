@@ -60,7 +60,7 @@ public class SubStringTest {
     public static int rabinKarpSubStringSearch(String pat, String text) {
         int N = text.length();
 
-        RabinKarpHash hashCalc = new RabinKarpHash(pat, pat.length());
+        RabinKarpHash hashCalc = new RabinKarpHash(pat);
         long refHash = hashCalc.getPatternHash();
         long curHash = hashCalc.calculateHash(text);
 

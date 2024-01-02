@@ -143,6 +143,7 @@ class TandemRepeatFinder {
 
 }
 
+
 public class SubStringInterview {
 
     /*
@@ -219,6 +220,13 @@ public class SubStringInterview {
         return tandem.getTandem();
     }
 
+    /*
+    Longest palindromic substring.
+    Given a string s, find the longest substring that is a palindrome in expected linearithmic time.
+     */
+    public static String findPalindrome(String s) {
+        return null;
+    }
 
     private static boolean smoothTransition(int stage, int nextStage) {
         return nextStage == stage + 1;

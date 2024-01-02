@@ -13,8 +13,8 @@ public class PrimeNumberFounder {
             if (!divisble[i]) {
                 for (int j = 2; j <= N/2 && j * i <N; j++)
                     divisble[j * i] = true;
-                i += 1;
-            } else i++;
+            }
+            i+=1;
         }
         int greatestPrime = 2;
 
@@ -29,7 +29,7 @@ public class PrimeNumberFounder {
     }
 
     public static void main(String[] args) {
-        System.out.println(getLargestPrimeNumber(1000000));
+        System.out.println(getLargestPrimeNumber(1000));
         assert getLargestPrimeNumber(1000000) == 999983;
     }
 }
