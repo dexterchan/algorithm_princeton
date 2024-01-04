@@ -62,31 +62,35 @@ class KarpHash {
 public class PalindromeFinder {
 
     public String findPalindromeInLength(String str, int length) {
-        if (length<=1) return null;
+        if (length <= 1) return null;
         int keyLength = length / 2;
         String reverseStr = new StringBuilder(str).reverse().toString();
 
-        String key = str.substring(0, keyLength);
-        String reverseKey = reverseStr.substring(0, keyLength);
+        long[] hashValues = new long[str.length()];
+        long[] hashReverseValues = new long[str.length()];
 
-        KarpHash karpHash = new KarpHash(key.length());
-        long hashSeed = karpHash.calculateHash(key);
-        long hashReverseSeed = karpHash.calculateHash(reverseKey);
+        hashValues = calculateHashValues(str, keyLength, hashValues);
+        hashReverseValues = calculateHashValues(reverseStr, keyLength, hashReverseValues);
 
-        long[] hashSeedValues = new long[str.length()];
-        long[] hashSeedReverseValues = new long[str.length()];
-
-        hashSeedValues[keyLength - 1] = hashSeed;
-        hashSeedReverseValues[str.length() - keyLength] = hashReverseSeed;
-        for (int i = 0; i < str.length() - keyLength * 2; i++) {
-            long h = karpHash.addNewCharOnRight(hashSeedValues[i + keyLength - 1], str.charAt(i + keyLength));
-            hashSeedValues[i + keyLength] = karpHash.removeOldCharOnLeft(h, str.charAt(i));
-
-            h = karpHash.addNewCharOnRight(hashSeedReverseValues[str.length() - keyLength - i], reverseStr.charAt(i + keyLength));
-            hashSeedReverseValues[str.length() - keyLength - i - 1] = karpHash.removeOldCharOnLeft(h, reverseStr.charAt(i));
+        for (int i=keyLength-1;i<str.length()-keyLength*2;i++){
+            int j = str.length() - i;
+            if (hashValues[i] == hashReverseValues[j]){
+                return str.substring(i-keyLength, j+keyLength);
+            }
         }
+        return findPalindromeInLength(str, length / 2);
+    }
 
-        return findPalindromeInLength(str, length/2);
+    private long[] calculateHashValues(String str, int keyLength, long[] hashValueOutput) {
+        if (hashValueOutput.length != str.length()) throw new IllegalArgumentException();
+        KarpHash karpHash = new KarpHash(keyLength);
+
+        hashValueOutput[keyLength - 1] = karpHash.calculateHash(str.substring(0, keyLength));
+        for (int i = keyLength; i < str.length() - keyLength * 2; i++) {
+            hashValueOutput[i] = karpHash.addNewCharOnRight(hashValueOutput[i - 1], str.charAt(i));
+            hashValueOutput[i] = karpHash.removeOldCharOnLeft(hashValueOutput[i], str.charAt(i - keyLength));
+        }
+        return hashValueOutput;
     }
 
     public static void main(String[] args) {
