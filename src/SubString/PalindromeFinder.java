@@ -83,35 +83,32 @@ public class PalindromeFinder {
         if (searchLength <= 1) return null;
         Arrays.fill(hashs, NOT_FOUND);
         Arrays.fill(hashRevs, NOT_FOUND);
-        String resultEven = null;
-        String resultOdd = null;
 
-        boolean isEven = searchLength % 2 == 0;
-        int keyLength = isEven ? searchLength / 2 : searchLength / 2 + 1;
+        int keyLength = searchLength == 3 ? 2 : searchLength / 2;
 
         this.calculateHashValues(str, keyLength, hashs);
         this.calculateHashValues(revStr, keyLength, hashRevs);
 
+        int foundEven = isPalindromeFoundEvenCase(hashs, hashRevs);
+        int foundOdd = isPalindromeFoundOddCase(hashs, hashRevs);
         //Loop through the result
-        int found = NOT_FOUND;
-        found = isEven ? isPalindromeFoundEvenCase(hashs, hashRevs) : isPalindromeFoundOddCase(hashs, hashRevs);
-        if (found != NOT_FOUND) {
-            return getSearchResult(str, found, isEven, keyLength);
+        String candidate1 = null, candidate2 = null;
+        if (foundEven != NOT_FOUND) {
+            candidate1 = getSearchResult(str, foundEven, true, keyLength);
         }
+        if (foundOdd != NOT_FOUND) {
+            candidate2 = getSearchResult(str, foundOdd, false, keyLength);
+        }
+        if (foundEven != NOT_FOUND && foundOdd != NOT_FOUND) {
+            if (candidate1.length() > candidate2.length()) return candidate1;
+            else return candidate2;
+        }
+        if (foundEven != NOT_FOUND && foundOdd == NOT_FOUND) return candidate1;
+        if (foundEven == NOT_FOUND && foundOdd != NOT_FOUND) return candidate2;
 
-        resultEven = bfsPalindromeSearch(str, revStr, searchLength / 2, hashs, hashRevs);
-        if (searchLength > 2 && isEven)
-            resultOdd = bfsPalindromeSearch(str, revStr, searchLength / 2 + 1, hashs, hashRevs);
-        if (resultEven == null && resultOdd == null)
-            return null;
-        if (resultEven == null && resultOdd != null)
-            return resultOdd;
-        if (resultEven != null && resultOdd == null)
-            return resultEven;
-        if (resultEven.length() > resultOdd.length())
-            return resultEven;
-        else
-            return resultOdd;
+        int nextSearchLength = searchLength > 3 ? searchLength / 2 : searchLength - 1;
+        return bfsPalindromeSearch(str, revStr, nextSearchLength, hashs, hashRevs);
+
     }
 
     private static String getSearchResult(String str, int found, boolean isEven, int keyLength) {
@@ -183,17 +180,34 @@ public class PalindromeFinder {
     private static void testBfsPalindromeSample() {
         PalindromeFinder finder = new PalindromeFinder();
         String result;
+
+        result = finder.findPalindromeInLength("aabbaaccddeeddcc");
+        assert result.equals("ccddeeddcc");
+
         result = finder.findPalindromeInLength("abcdee");
-        System.out.println(result);
+        assert result.equals("ee");
+
+        result = finder.findPalindromeInLength("lxabcdbayxded");
+        assert result.equals("ded");
+
+        result = finder.findPalindromeInLength("xxabcdedcbayxabcdeedcba");
+        assert result.equals("abcdeedcba");
 
         result = finder.findPalindromeInLength("psabcdedcba");
-        System.out.println(result);
+        assert result.equals("abcdedcba");
 
         result = finder.findPalindromeInLength("abcdeedcba");
-        System.out.println(result);
+        assert result.equals("abcdeedcba");
 
         result = finder.findPalindromeInLength("abcdedcba");
-        System.out.println(result);
+        assert result.equals("abcdedcba");
+
+        result = finder.findPalindromeInLength("xxabcdedcbayx");
+        assert result.equals("abcdedcba");
+
+
+        result = finder.findPalindromeInLength("ktabcdeedcbaxxabcdedcbayx");
+        assert result.equals("edcbaxxabcde");
 
 
     }
