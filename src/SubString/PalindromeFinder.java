@@ -89,22 +89,15 @@ public class PalindromeFinder {
         this.calculateHashValues(str, keyLength, hashs);
         this.calculateHashValues(revStr, keyLength, hashRevs);
 
-        int foundEven = isPalindromeFoundEvenCase(hashs, hashRevs);
-        int foundOdd = isPalindromeFoundOddCase(hashs, hashRevs);
-        //Loop through the result
-        String candidate1 = null, candidate2 = null;
-        if (foundEven != NOT_FOUND) {
-            candidate1 = getSearchResult(str, foundEven, true, keyLength);
+        String candidateEven = foundPalindromeEvenCase(str, hashs, hashRevs, keyLength);
+        String candidateOdd = foundPalindromeOddCase(str, hashs, hashRevs, keyLength);
+
+        if (candidateEven != null && candidateOdd != null) {
+            if (candidateEven.length() > candidateOdd.length()) return candidateEven;
+            else return candidateOdd;
         }
-        if (foundOdd != NOT_FOUND) {
-            candidate2 = getSearchResult(str, foundOdd, false, keyLength);
-        }
-        if (foundEven != NOT_FOUND && foundOdd != NOT_FOUND) {
-            if (candidate1.length() > candidate2.length()) return candidate1;
-            else return candidate2;
-        }
-        if (foundEven != NOT_FOUND && foundOdd == NOT_FOUND) return candidate1;
-        if (foundEven == NOT_FOUND && foundOdd != NOT_FOUND) return candidate2;
+        if (candidateEven != null && candidateOdd == null) return candidateEven;
+        if (candidateEven == null && candidateOdd != null) return candidateOdd;
 
         int nextSearchLength = searchLength > 3 ? searchLength / 2 : searchLength - 1;
         return bfsPalindromeSearch(str, revStr, nextSearchLength, hashs, hashRevs);
@@ -181,11 +174,21 @@ public class PalindromeFinder {
         PalindromeFinder finder = new PalindromeFinder();
         String result;
 
-        result = finder.findPalindromeInLength("aabbaaccddeeddcc");
-        assert result.equals("ccddeeddcc");
+        result = finder.findPalindromeInLength("abcdedcbarabcdeedcba");
+        assert result.equals("edcbarabcde");
+
+        result = finder.findPalindromeInLength("abcdedcbarsabcdeedcba");
+        assert result.equals("abcdeedcba");
+
+        result = finder.findPalindromeInLength("abcdeedcba");
+        assert result.equals("abcdeedcba");
 
         result = finder.findPalindromeInLength("abcdee");
         assert result.equals("ee");
+
+        result = finder.findPalindromeInLength("aabbaaccddeeddcc");
+        assert result.equals("ccddeeddcc");
+
 
         result = finder.findPalindromeInLength("lxabcdbayxded");
         assert result.equals("ded");
@@ -196,8 +199,6 @@ public class PalindromeFinder {
         result = finder.findPalindromeInLength("psabcdedcba");
         assert result.equals("abcdedcba");
 
-        result = finder.findPalindromeInLength("abcdeedcba");
-        assert result.equals("abcdeedcba");
 
         result = finder.findPalindromeInLength("abcdedcba");
         assert result.equals("abcdedcba");
@@ -241,6 +242,55 @@ public class PalindromeFinder {
             assert found == e2;
         }
     }
+
+    private static String foundPalindromeEvenCase(String str, long[] hashValues, long[] hashRevValues, int keyLength) {
+        int found = NOT_FOUND;
+        int len = hashValues.length;
+        String longestString = null;
+        int longStringLen = 0;
+        for (int i = 0; i < len && len - i - 2 >= 0; i++) {
+            if (hashValues[i] != NOT_FOUND && hashValues[i] == hashRevValues[len - 1 - i - 1]) {
+                found = i;
+                String tmpPalindromeString = getLongestPalindromeString(str, found, keyLength, true);
+                if (tmpPalindromeString.length() > longStringLen) {
+                    longStringLen = tmpPalindromeString.length();
+                    longestString = tmpPalindromeString;
+                }
+            }
+        }
+        return longestString;
+    }
+
+    private static String foundPalindromeOddCase(String str, long[] hashValues, long[] hashRevValues, int keyLength) {
+        int found = NOT_FOUND;
+        int len = hashValues.length;
+        String longestString = null;
+        int longStringLen = 0;
+        for (int i = 0; i < len && len - i - 1 >= 0; i++) {
+            if (hashValues[i] != NOT_FOUND && hashValues[i] == hashRevValues[len - 1 - i]) {
+                found = i;
+                String tmpPalindromeString = getLongestPalindromeString(str, found, keyLength, false);
+                if (tmpPalindromeString.length() > longStringLen) {
+                    longStringLen = tmpPalindromeString.length();
+                    longestString = tmpPalindromeString;
+                }
+            }
+        }
+        return longestString;
+    }
+
+    private static String getLongestPalindromeString(String str, int found, int keyLength, boolean isEven) {
+        int begin = found - keyLength + 1;
+        int end = found + (isEven ? keyLength : keyLength - 1);
+        while (begin - 1 >= 0 && (end + 1) < str.length()) {
+            if (str.charAt(begin - 1) == str.charAt(end + 1)) {
+                begin--;
+                end++;
+            } else break;
+        }
+        return str.substring(begin, end + 1);
+    }
+
 
     private static int isPalindromeFoundEvenCase(long[] hashValues, long[] hashRevValues) {
         int found = NOT_FOUND;
