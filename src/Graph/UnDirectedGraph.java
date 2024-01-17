@@ -1,17 +1,72 @@
 package Graph;
+
+import java.util.Arrays;
 import java.util.Stack;
 //https://csacademy.com/app/graph_editor/
 
-class Bag<E>{
+
+// Implement depth-first search in an undirected graph without using recursion.
+class GraphDfs {
+    private final static int INVALID = -1;
+    private boolean[] marked;
+    private int[] edgedTo;
+
+    private UnDirectedGraph graph;
+
+    public GraphDfs(UnDirectedGraph graph, int v) {
+        marked = new boolean[graph.V()];
+        edgedTo = new int[graph.V()];
+        Arrays.fill(marked, false);
+        Arrays.fill(edgedTo, INVALID);
+        this.graph = graph;
+    }
+
+    private void dfs(UnDirectedGraph g, int v) {
+        Stack<Integer> stack = new Stack<>();
+        stack.add(v);
+
+        int newVertex = INVALID;
+        while (!stack.isEmpty()) {
+            newVertex = stack.pop();
+            if (!isValidVertex(newVertex)) throw new IllegalArgumentException();
+            this.marked[newVertex] = true;
+
+            for (int cv : graph.adj(newVertex)) {
+                if (!isValidVertex(cv)) throw new IllegalArgumentException();
+                if (this.marked[cv]) continue;
+                this.edgedTo[cv] = newVertex;
+                stack.push(cv);
+            }
+        }
+    }
+
+    private boolean isValidVertex(int v) {
+        if (v < 0 || v >= graph.V()) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isConnected(int v){
+        return this.marked[v];
+    }
+
+    public int connectedFrom(int v){
+        return this.edgedTo[v];
+    }
+
+}
+
+class Bag<E> {
     private Node first;
     private int size;
 
-    private class Node{
+    private class Node {
         E item;
         Node next;
     }
 
-    public void add(E item){
+    public void add(E item) {
         Node oldFirst = first;
         first = new Node();
         first.item = item;
@@ -19,20 +74,21 @@ class Bag<E>{
         size++;
     }
 
-    public int size(){
+    public int size() {
         return size;
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return size == 0;
     }
 
-    public Iterable<E> iterator(){
+    public Iterable<E> iterator() {
         return new Iterable<E>() {
             @Override
             public java.util.Iterator<E> iterator() {
                 return new java.util.Iterator<E>() {
                     Node current = first;
+
                     @Override
                     public boolean hasNext() {
                         return current != null;
@@ -63,18 +119,6 @@ public class UnDirectedGraph {
 
         for (int v = 0; v < V; v++)
             adj[v] = new Bag<Integer>();
-    }
-
-    public UnDirectedGraph(UnDirectedGraph G) {
-        this(G.V());
-        this.E = G.E();
-        for (int v = 0; v < G.V(); v++) {
-            Stack<Integer> reverse = new Stack<Integer>();
-            for (int w : G.adj[v].iterator())
-                reverse.push(w);
-            for (int w : reverse)
-                adj[v].add(w);
-        }
     }
 
     public int V() {
@@ -127,11 +171,11 @@ public class UnDirectedGraph {
         G.addEdge(0, 2);
         G.addEdge(0, 4);
         G.addEdge(0, 5);
-        G.addEdge(1,4);
-        G.addEdge(1,5);
-        G.addEdge(2,3);
-        G.addEdge(2,4);
-        G.addEdge(4,5);
+        G.addEdge(1, 4);
+        G.addEdge(1, 5);
+        G.addEdge(2, 3);
+        G.addEdge(2, 4);
+        G.addEdge(4, 5);
         System.out.println(G.toString());
     }
 }
