@@ -19,9 +19,10 @@ class GraphDfs {
         Arrays.fill(marked, false);
         Arrays.fill(edgedTo, INVALID);
         this.graph = graph;
+        this.dfs(v);
     }
 
-    private void dfs(UnDirectedGraph g, int v) {
+    private void dfs(int v) {
         Stack<Integer> stack = new Stack<>();
         stack.add(v);
 
@@ -48,10 +49,12 @@ class GraphDfs {
     }
 
     public boolean isConnected(int v){
+        if(!isValidVertex(v)) return false;
         return this.marked[v];
     }
 
     public int connectedFrom(int v){
+        if(!isValidVertex(v)) return INVALID;
         return this.edgedTo[v];
     }
 
@@ -167,7 +170,26 @@ public class UnDirectedGraph {
     }
 
     public static void main(String[] args) {
-        UnDirectedGraph G = new UnDirectedGraph(6);
+        UnDirectedGraph G = createUnDirectedGraph();
+        testGraphDfs();
+    }
+
+    private static void testGraphDfs(){
+        UnDirectedGraph G = createUnDirectedGraph();
+        var graphDfs = new GraphDfs(G, 2);
+
+        for (int i=0;i<=5;i++)
+            assert graphDfs.isConnected(i);
+        assert !graphDfs.isConnected(6);
+        assert !graphDfs.isConnected(7);
+        assert !graphDfs.isConnected(100);
+
+        assert graphDfs.connectedFrom(1)==4 || graphDfs.connectedFrom(1)==5;
+        assert graphDfs.connectedFrom(1)!=2;
+    }
+
+    private static  UnDirectedGraph createUnDirectedGraph(){
+        UnDirectedGraph G = new UnDirectedGraph(10);
         G.addEdge(0, 2);
         G.addEdge(0, 4);
         G.addEdge(0, 5);
@@ -176,6 +198,7 @@ public class UnDirectedGraph {
         G.addEdge(2, 3);
         G.addEdge(2, 4);
         G.addEdge(4, 5);
-        System.out.println(G.toString());
+        G.addEdge(6,7);
+        return G;
     }
 }
